@@ -2,6 +2,7 @@ mod check;
 mod errors;
 mod interp;
 mod lexer;
+mod net;
 mod parser;
 
 use errors::LangError;
@@ -10,7 +11,13 @@ use interp::Interp;
 /// Lex, parse and run a program. Returns the interpreter (for its output and
 /// audit log) together with the result.
 fn run_source(src: &str) -> (Interp, Result<(), LangError>) {
+    run_source_with(src, net::real_fetch)
+}
+
+/// Same as `run_source`, but with a custom fetch function (used by tests).
+fn run_source_with(src: &str, fetch: net::FetchFn) -> (Interp, Result<(), LangError>) {
     let mut interp = Interp::new();
+    interp.fetch_impl = fetch;
     let result = match lexer::lex(src).and_then(parser::parse) {
         Ok(program) => match check::check(&program) {
             Ok(()) => interp.run(&program),
@@ -214,6 +221,100 @@ mod tests {
             error_kind("for x in [\"a\"] { needs read(\"a\") }"),
             "needs_in_block"
         );
+    }
+
+    fn fake_fetch(url: &str) -> Result<String, String> {
+        Ok(format!("page from {}", url))
+    }
+
+    fn failing_fetch(_url: &str) -> Result<String, String> {
+        Err("boom".to_string())
+    }
+
+    #[test]
+    fn host_of_accepts_normal_urls() {
+        assert_eq!(net::host_of("https://example.com").unwrap(), "example.com");
+        assert_eq!(net::host_of("https://Example.COM/a?b=c#d").unwrap(), "example.com");
+        assert_eq!(net::host_of("https://example.com:8443/x").unwrap(), "example.com");
+    }
+
+    #[test]
+    fn host_of_refuses_tricks() {
+        assert!(net::host_of("http://example.com").is_err());
+        assert!(net::host_of("https://example.com@evil.com/").is_err());
+        assert!(net::host_of("https://example.com\\@evil.com/").is_err());
+        assert!(net::host_of("https://evil.com\\.example.com/").is_err());
+        assert!(net::host_of("https://").is_err());
+        assert!(net::host_of("https://exa mple.com").is_err());
+    }
+
+    #[test]
+    fn fetch_with_permission_returns_the_page() {
+        let src = "needs fetch(\"example.com\")\nprint(fetch(\"https://example.com/a\"))";
+        let (interp, result) = run_source_with(src, fake_fetch);
+        result.expect("program should succeed");
+        assert_eq!(interp.output, vec!["page from https://example.com/a"]);
+        let last = interp.log.last().unwrap();
+        assert_eq!(last.action, "fetch");
+        assert_eq!(last.target, "example.com");
+    }
+
+    #[test]
+    fn fetch_of_another_domain_is_refused_before_running() {
+        let src = "needs fetch(\"example.com\")\nprint(\"started\")\nlet p = fetch(\"https://evil.com/x\")";
+        let (interp, result) = run_source_with(src, fake_fetch);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+    }
+
+    #[test]
+    fn a_subdomain_needs_its_own_permission() {
+        let src = "needs fetch(\"example.com\")\nlet p = fetch(\"https://api.example.com\")";
+        let (_, result) = run_source_with(src, fake_fetch);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+    }
+
+    #[test]
+    fn user_info_trick_and_plain_http_are_invalid_urls() {
+        let a = "needs fetch(\"example.com\")\nlet p = fetch(\"https://example.com@evil.com/\")";
+        let b = "needs fetch(\"example.com\")\nlet p = fetch(\"http://example.com\")";
+        assert_eq!(run_source_with(a, fake_fetch).1.expect_err("fail").kind, "invalid_url");
+        assert_eq!(run_source_with(b, fake_fetch).1.expect_err("fail").kind, "invalid_url");
+    }
+
+    #[test]
+    fn static_check_covers_fetch_in_a_loop() {
+        let src = "needs fetch(\"example.com\")\nprint(\"started\")\nfor u in [\"https://example.com/1\", \"https://evil.com/2\"] { let p = fetch(u) }";
+        let (interp, result) = run_source_with(src, fake_fetch);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+    }
+
+    #[test]
+    fn failed_fetches_are_retried_and_logged() {
+        let src = "needs fetch(\"example.com\")\nretry 3 { let p = fetch(\"https://example.com\") }";
+        let (interp, result) = run_source_with(src, failing_fetch);
+        assert_eq!(result.expect_err("should fail").kind, "retries_exhausted");
+        let failed = interp
+            .log
+            .iter()
+            .filter(|e| e.action == "fetch" && !e.ok)
+            .count();
+        assert_eq!(failed, 3);
+    }
+
+    #[test]
+    fn fetch_budget_stops_the_program() {
+        let src = "needs fetch(\"example.com\")\nfor u in [\"https://example.com/1\", \"https://example.com/2\", \"https://example.com/3\"] { let p = fetch(u) }";
+        let program = parser::parse(lexer::lex(src).unwrap()).unwrap();
+        check::check(&program).unwrap();
+        let mut interp = Interp::new();
+        interp.fetch_impl = fake_fetch;
+        interp.max_fetches = 2;
+        let err = interp.run(&program).expect_err("should hit the budget");
+        assert_eq!(err.kind, "budget_exceeded");
     }
 
     #[test]

@@ -2,7 +2,7 @@
 //!
 //! It collects the declared `needs` permissions and rejects the whole program if
 //! a `read(...)` or `write(...)` is not covered. It checks:
-//!   - literal paths:            read("a.txt")
+//!   - literal paths and URLs:   read("a.txt"), fetch("https://example.com/x")
 //!   - loop variables over a literal list of texts:
 //!         for p in ["a.txt", "b.txt"] { read(p) }   (checks both files)
 //!
@@ -12,6 +12,7 @@
 use std::collections::HashMap;
 
 use crate::errors::LangError;
+use crate::net;
 use crate::parser::{Expr, Stmt, StmtKind};
 
 /// Known possible text values of loop variables.
@@ -104,25 +105,41 @@ fn check_expr(
             for arg in args {
                 check_expr(arg, line, caps, env)?;
             }
-            if name == "read" || name == "write" {
-                let paths: Vec<String> = match args.first() {
+            if name == "read" || name == "write" || name == "fetch" {
+                let values: Vec<String> = match args.first() {
                     Some(Expr::Str(p)) => vec![p.clone()],
                     Some(Expr::Var(v)) => env.get(v).cloned().unwrap_or_default(),
                     _ => Vec::new(),
                 };
-                for path in &paths {
-                    let allowed = caps.iter().any(|(a, t)| a == name && t == path);
+                for value in &values {
+                    // For fetch the permission is about the domain, not the full URL.
+                    let target = if name == "fetch" {
+                        match net::host_of(value) {
+                            Ok(host) => host,
+                            Err(msg) => {
+                                return Err(LangError::new(
+                                    "invalid_url",
+                                    Some(line),
+                                    format!("fetch(\"{}\") is refused: {}", value, msg),
+                                    "use a full https URL such as fetch(\"https://example.com/page\")",
+                                ))
+                            }
+                        }
+                    } else {
+                        value.clone()
+                    };
+                    let allowed = caps.iter().any(|(a, t)| a == name && t == &target);
                     if !allowed {
                         return Err(LangError::new(
                             "capability_denied",
                             Some(line),
                             format!(
                                 "{}(\"{}\") is not permitted; nothing was executed",
-                                name, path
+                                name, value
                             ),
                             format!(
                                 "add this line at the top of the program: needs {}(\"{}\")",
-                                name, path
+                                name, target
                             ),
                         ));
                     }

@@ -157,12 +157,12 @@ impl Parser {
             }
         };
         self.expect(Tok::RParen, "')'")?;
-        if action != "read" && action != "write" {
+        if action != "read" && action != "write" && action != "fetch" {
             return Err(LangError::new(
                 "unknown_permission",
                 Some(line),
                 format!("'{}' is not a known permission", action),
-                "available permissions: read(\"path\"), write(\"path\")",
+                "available permissions: read(\"path\"), write(\"path\"), fetch(\"domain\")",
             ));
         }
         Ok(StmtKind::Needs { action, target })

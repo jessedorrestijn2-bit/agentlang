@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
 use crate::errors::LangError;
+use crate::net::{self, FetchFn};
 use crate::parser::{Expr, Stmt, StmtKind};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -85,6 +86,11 @@ pub struct Interp {
     vars: HashMap<String, Value>,
     pub output: Vec<String>,
     pub log: Vec<LogEntry>,
+    /// The function used for `fetch`. Tests replace it with a fake.
+    pub fetch_impl: FetchFn,
+    /// Maximum number of fetches in one run (a simple cost budget).
+    pub max_fetches: usize,
+    fetch_count: usize,
 }
 
 impl Interp {
@@ -94,6 +100,9 @@ impl Interp {
             vars: HashMap::new(),
             output: Vec::new(),
             log: Vec::new(),
+            fetch_impl: net::real_fetch,
+            max_fetches: 50,
+            fetch_count: 0,
         }
     }
 
@@ -188,8 +197,8 @@ impl Interp {
             match failure {
                 None => return Ok(()),
                 Some(e) => {
-                    // A missing permission will not fix itself, so never retry it.
-                    if e.kind == "capability_denied" {
+                    // A missing permission or a used-up budget will not fix itself, so never retry those.
+                    if e.kind == "capability_denied" || e.kind == "budget_exceeded" {
                         return Err(e);
                     }
                     self.record("retry", &format!("attempt {} of {} failed", attempt, times), false);
@@ -279,6 +288,45 @@ impl Interp {
                     }
                 }
             }
+            ("fetch", [Value::Str(url)]) => {
+                let host = match net::host_of(url) {
+                    Ok(h) => h,
+                    Err(msg) => {
+                        return Err(LangError::new(
+                            "invalid_url",
+                            Some(line),
+                            msg,
+                            "use a full https URL such as fetch(\"https://example.com/page\")",
+                        ))
+                    }
+                };
+                self.require("fetch", &host, line)?;
+                if self.fetch_count >= self.max_fetches {
+                    self.record("fetch", &host, false);
+                    return Err(LangError::new(
+                        "budget_exceeded",
+                        Some(line),
+                        format!("more than {} fetches in one run", self.max_fetches),
+                        "fetch fewer pages",
+                    ));
+                }
+                self.fetch_count += 1;
+                match (self.fetch_impl)(url) {
+                    Ok(body) => {
+                        self.record("fetch", &host, true);
+                        Ok(Value::Str(body))
+                    }
+                    Err(msg) => {
+                        self.record("fetch", &host, false);
+                        Err(LangError::new(
+                            "fetch_failed",
+                            Some(line),
+                            format!("could not fetch '{}': {}", url, msg),
+                            "check the URL, or wrap the call in a retry block",
+                        ))
+                    }
+                }
+            }
             ("write", [Value::Str(path), Value::Str(text)]) => {
                 self.require("write", path, line)?;
                 match std::fs::write(path, text) {
@@ -301,7 +349,7 @@ impl Interp {
                 "bad_call",
                 Some(line),
                 format!("unknown function or wrong arguments: {}(...) with {} argument(s)", name, args.len()),
-                "builtins: print(x), len(text or list), read(path), write(path, text)",
+                "builtins: print(x), len(text or list), read(path), write(path, text), fetch(url)",
             )),
         }
     }
