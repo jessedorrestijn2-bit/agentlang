@@ -13,11 +13,12 @@ sandbox on afterwards, the things agents need are part of the language:
 6. **Every program terminates.** The only repetition is `retry` (fixed limit) and `for`
    over a finite list. There is no `while`.
 
-## Status (v0.3)
+## Status (v0.4)
 
 This is an early skeleton: lexer, parser, static permission check, interpreter, tests
-and seven examples. v0.2 passed its 14 tests in Codespaces; v0.3 (lists and `for`
-loops, 20 tests) still needs its first `cargo test`.
+and nine examples. v0.3 passed its 20 tests in Codespaces; v0.4 adds `fetch` (29 tests)
+and still needs its first `cargo test`. It is the first version with a dependency
+(`ureq`, for HTTPS), so the first build downloads packages.
 
 ## Syntax
 
@@ -25,14 +26,17 @@ loops, 20 tests) still needs its first `cargo test`.
 # comment
 needs read("notes.txt")        # permission (only allowed at the top)
 needs write("out.txt")
+needs fetch("example.com")     # network permission is per domain
 
 let text = read("notes.txt")   # variables
-print(text)                    # builtins: print, len, read, write
+print(text)                    # builtins: print, len, read, write, fetch
 verify len(text) == 10         # stop the program if false
 
 retry 3 {                      # bounded retry, never repeats a missing permission
   let t = read("maybe.txt")
 }
+
+let page = fetch("https://example.com/page")   # https only, domain must be declared
 
 for f in ["a.txt", "b.txt"] {  # loops over a finite list, always stops
   print(read(f))
@@ -40,6 +44,16 @@ for f in ["a.txt", "b.txt"] {  # loops over a finite list, always stops
 ```
 
 Values are text, numbers, booleans and lists. `==` compares two values.
+
+## How `fetch` stays safe
+
+- Only `https://` URLs. The permission names a domain: `needs fetch("example.com")`.
+- A subdomain such as `api.example.com` needs its own permission.
+- Tricks like `https://example.com@evil.com/` are refused as invalid URLs.
+- Redirects are blocked, because they could leave the permitted domain.
+- 10 second timeout and at most 50 fetches per run (a simple cost budget).
+- The audit log records only the domain, not the full URL (which may contain secrets).
+- The tests use a fake fetch function, so they never need the internet.
 
 ## Run it
 
@@ -54,6 +68,8 @@ cargo run -- examples/03_denied.agl          # must fail with capability_denied
 cargo run -- examples/04_retry.agl           # must fail with retries_exhausted
 cargo run -- examples/06_for_loop.agl        # loops over two files
 cargo run -- examples/07_for_denied.agl      # refused before anything runs
+cargo run -- examples/08_fetch.agl           # needs internet
+cargo run -- examples/09_fetch_denied.agl    # refused before anything runs
 ```
 
 Example of a refused program (stderr):
@@ -68,15 +84,16 @@ Example of a refused program (stderr):
 - Permissions are checked before running for literal paths and for loop variables over a
   literal list (`src/check.rs`). Other paths, such as a variable that holds a result, are
   still only checked while running.
-- No network access, no parallel calls, no memory, no sub-agents yet.
+- No parallel calls, no memory, no sub-agents yet. `fetch` only does GET and has no
+  wildcard domains. Redirects are blocked rather than followed.
 - Nested `retry` blocks multiply their attempts.
 
 ## Roadmap
 
 1. Make it compile and pass `cargo test`.
 2. ~~Add a static permission check before execution.~~ Done in v0.2.
-3. ~~Lists and `for` loops.~~ Done in v0.3. Next: `fetch(url)` with domain permissions,
-   then parallel calls with a time and cost budget.
+3. ~~Lists and `for` loops.~~ Done in v0.3. ~~`fetch(url)` with domain permissions and a
+   fetch budget.~~ Done in v0.4. Next: parallel calls with a time and cost budget.
 4. Add persistent memory with its own permission, then delegation where permissions can only shrink.
 5. Replay: re-run an audit log deterministically and report where results differ.
 6. Benchmark: the same agent tasks in this language and in Python, measuring errors and tokens.
