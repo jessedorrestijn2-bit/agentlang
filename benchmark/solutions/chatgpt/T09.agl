@@ -1,0 +1,6 @@
+needs read("data/a.txt")
+needs read("data/b.txt")
+needs read("data/c.txt")
+print(len(read("data/a.txt")))
+print(len(read("data/b.txt")))
+print(len(read("data/c.txt")))

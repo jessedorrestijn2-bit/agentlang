@@ -17,6 +17,7 @@ pub enum Tok {
     Comma,
     Assign,
     EqEq,
+    NotEq,
     Eof,
 }
 
@@ -113,6 +114,19 @@ pub fn lex(src: &str) -> Result<Vec<Token>, LangError> {
                         Tok::EqEq
                     } else {
                         Tok::Assign
+                    }
+                }
+                '!' => {
+                    if i + 1 < chars.len() && chars[i + 1] == '=' {
+                        i += 1;
+                        Tok::NotEq
+                    } else {
+                        return Err(LangError::new(
+                            "unexpected_character",
+                            Some(line),
+                            "a lone '!' is not valid",
+                            "use != to compare two values",
+                        ));
                     }
                 }
                 _ => {

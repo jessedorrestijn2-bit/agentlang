@@ -11,14 +11,15 @@ sandbox on afterwards, the things agents need are part of the language:
 5. **Errors are structured JSON** with a kind, a line, a message and a concrete hint,
    so a model can feed them back and repair its own program.
 6. **Every program terminates.** The only repetition is `retry` (fixed limit) and `for`
-   over a finite list. There is no `while`.
+   over a finite list. There is no `while`. `if`/`else` only chooses between blocks.
 
-## Status (v0.5)
+## Status (v0.6)
 
 This is an early skeleton: lexer, parser, static permission check, interpreter, tests
-and nine examples. v0.4 passed its 29 tests in Codespaces. v0.5 adds an operator policy
-(`--allow`), a pilot benchmark (`benchmark/`) and automatic tests on GitHub
-(`.github/workflows/ci.yml`), and still needs its first `cargo test`.
+and ten examples. v0.5 passed its tests and the benchmark in Codespaces and on GitHub.
+v0.6 adds `if`/`else`, `!=`, `concat` and `trim` (40 tests) and still needs its first
+`cargo test`. A first pilot run (one model, one try) scored Python 10/10 and agentlang
+8/10; the two misses were exactly the features v0.6 now adds.
 
 ## Syntax
 
@@ -29,7 +30,7 @@ needs write("out.txt")
 needs fetch("example.com")     # network permission is per domain
 
 let text = read("notes.txt")   # variables
-print(text)                    # builtins: print, len, read, write, fetch
+print(text)                    # builtins: print, len, trim, concat, read, write, fetch
 verify len(text) == 10         # stop the program if false
 
 retry 3 {                      # bounded retry, never repeats a missing permission
@@ -37,6 +38,12 @@ retry 3 {                      # bounded retry, never repeats a missing permissi
 }
 
 let page = fetch("https://example.com/page")   # https only, domain must be declared
+
+if trim(text) == "yes" {       # chooses a block; else is optional; conditions are == or !=
+  print(concat("got: ", text))
+} else {
+  print("no")
+}
 
 for f in ["a.txt", "b.txt"] {  # loops over a finite list, always stops
   print(read(f))
@@ -84,6 +91,7 @@ cargo run -- examples/06_for_loop.agl        # loops over two files
 cargo run -- examples/07_for_denied.agl      # refused before anything runs
 cargo run -- examples/08_fetch.agl           # needs internet
 cargo run -- examples/09_fetch_denied.agl    # refused before anything runs
+cargo run -- examples/10_if_and_concat.agl   # if/else, concat and trim
 ```
 
 Example of a refused program (stderr):
@@ -111,5 +119,6 @@ Example of a refused program (stderr):
 4. Add persistent memory with its own permission, then delegation where permissions can only shrink.
 5. Replay: re-run an audit log deterministically and report where results differ.
 6. ~~Pilot benchmark and automatic tests on GitHub.~~ Done in v0.5 (see `benchmark/`).
-   Next: run it with real models, then add `if/else` and string joining if the stretch
-   tasks T06 and T07 show agents really need them.
+7. ~~`if`/`else`, `concat`, `trim`.~~ Done in v0.6, after the first pilot run showed agents
+   missed them. Next: rerun the benchmark with the new tasks T11 and T12, with more models
+   and several tries per task.

@@ -1,0 +1,4 @@
+needs read("data/flag.txt")
+needs write("out/result.txt")
+verify read("data/flag.txt") == "yes"
+write("out/result.txt", "enabled")

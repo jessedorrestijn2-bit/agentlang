@@ -4,6 +4,7 @@
 //!   1. `needs` (permission) lines may only appear at the top of a program.
 //!   2. `retry` must have a fixed upper limit between 1 and MAX_RETRIES.
 //!   3. `for` only loops over a finite list, so it always stops.
+//!   4. `if` / `else` only choose between two blocks, so they cannot loop.
 
 use crate::errors::LangError;
 use crate::lexer::{Tok, Token};
@@ -18,6 +19,7 @@ pub enum Expr {
     List(Vec<Expr>),
     Call(String, Vec<Expr>),
     Eq(Box<Expr>, Box<Expr>),
+    NotEq(Box<Expr>, Box<Expr>),
 }
 
 #[derive(Debug, Clone)]
@@ -28,6 +30,7 @@ pub enum StmtKind {
     Verify(Expr),
     Retry(u32, Vec<Stmt>),
     For(String, Expr, Vec<Stmt>),
+    If(Expr, Vec<Stmt>, Vec<Stmt>),
 }
 
 #[derive(Debug, Clone)]
@@ -136,6 +139,18 @@ impl Parser {
                 self.next();
                 self.for_stmt()?
             }
+            Tok::Ident(word) if word == "if" => {
+                self.next();
+                self.if_stmt()?
+            }
+            Tok::Ident(word) if word == "else" => {
+                return Err(LangError::new(
+                    "syntax_error",
+                    Some(line),
+                    "'else' without a matching 'if'",
+                    "an else block must directly follow an if block",
+                ));
+            }
             _ => StmtKind::Do(self.expr()?),
         };
         Ok(Stmt { line, kind })
@@ -239,12 +254,31 @@ impl Parser {
         Ok(StmtKind::For(var, list, body))
     }
 
+    fn if_stmt(&mut self) -> Result<StmtKind, LangError> {
+        let line = self.line();
+        let cond = self.expr()?;
+        let then_body = self.block(line)?;
+        let else_body = match self.peek().clone() {
+            Tok::Ident(word) if word == "else" => {
+                self.next();
+                self.block(line)?
+            }
+            _ => Vec::new(),
+        };
+        Ok(StmtKind::If(cond, then_body, else_body))
+    }
+
     fn expr(&mut self) -> Result<Expr, LangError> {
         let left = self.primary()?;
         if *self.peek() == Tok::EqEq {
             self.next();
             let right = self.primary()?;
             return Ok(Expr::Eq(Box::new(left), Box::new(right)));
+        }
+        if *self.peek() == Tok::NotEq {
+            self.next();
+            let right = self.primary()?;
+            return Ok(Expr::NotEq(Box::new(left), Box::new(right)));
         }
         Ok(left)
     }

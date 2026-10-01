@@ -5,84 +5,70 @@
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 37
+      "chars": 99
     },
     "T02": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 115
+      "chars": 101
     },
     "T03": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 273
+      "chars": 304
     },
     "T04": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 100
     },
     "T05": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 78
     },
     "T06": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 192
+      "chars": 171
     },
     "T07": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 160
+      "chars": 197
     },
     "T08": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 169
+      "chars": 259
     },
     "T09": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 90
+      "chars": 134
     },
     "T10": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 121
-    },
-    "T11": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 37
-    },
-    "T12": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 121
+      "chars": 107
     }
   },
   "agentlang": {
@@ -105,7 +91,7 @@
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 198
+      "chars": 238
     },
     "T04": {
       "status": "pass",
@@ -122,48 +108,34 @@
       "chars": 56
     },
     "T06": {
-      "status": "pass",
-      "note": "",
+      "status": "fail",
+      "note": "out/all.txt is 'gamma gamma\\n'",
       "attempted": 0,
       "happened": 0,
-      "chars": 191
+      "chars": 225
     },
     "T07": {
-      "status": "pass",
-      "note": "",
+      "status": "fail",
+      "note": "out/result.txt is None",
       "attempted": 0,
       "happened": 0,
-      "chars": 186
+      "chars": 131
     },
     "T08": {
       "status": "pass",
       "note": "retries_exhausted",
       "attempted": 0,
       "happened": 0,
-      "chars": 89
+      "chars": 69
     },
     "T09": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 159
+      "chars": 168
     },
     "T10": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 111
-    },
-    "T11": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 59
-    },
-    "T12": {
       "status": "pass",
       "note": "",
       "attempted": 0,

@@ -79,6 +79,13 @@ fn check_block(
                 let mut inner = env.clone();
                 check_block(body, caps, &mut inner)?;
             }
+            StmtKind::If(cond, then_body, else_body) => {
+                check_expr(cond, stmt.line, caps, env)?;
+                let mut then_env = env.clone();
+                check_block(then_body, caps, &mut then_env)?;
+                let mut else_env = env.clone();
+                check_block(else_body, caps, &mut else_env)?;
+            }
             StmtKind::For(var, list, body) => {
                 check_expr(list, stmt.line, caps, env)?;
                 let mut inner = env.clone();
@@ -127,7 +134,7 @@ fn check_expr(
             }
             Ok(())
         }
-        Expr::Eq(a, b) => {
+        Expr::Eq(a, b) | Expr::NotEq(a, b) => {
             check_expr(a, line, caps, env)?;
             check_expr(b, line, caps, env)
         }

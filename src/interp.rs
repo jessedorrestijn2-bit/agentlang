@@ -159,6 +159,26 @@ impl Interp {
                 }
             }
             StmtKind::Retry(times, body) => self.retry(*times, body, stmt.line),
+            StmtKind::If(cond, then_body, else_body) => {
+                let value = self.eval(cond, stmt.line)?;
+                let taken = match value {
+                    Value::Bool(b) => b,
+                    other => {
+                        return Err(LangError::new(
+                            "not_a_condition",
+                            Some(stmt.line),
+                            format!("an if needs a true/false condition but got {}", other.show()),
+                            "write a comparison such as: if a == b { ... }",
+                        ))
+                    }
+                };
+                self.record("if", if taken { "then" } else { "else" }, true);
+                let chosen = if taken { then_body } else { else_body };
+                for inner in chosen {
+                    self.exec(inner)?;
+                }
+                Ok(())
+            }
             StmtKind::For(var, list_expr, body) => {
                 let list = self.eval(list_expr, stmt.line)?;
                 let items = match list {
@@ -238,6 +258,11 @@ impl Interp {
                 let right = self.eval(b, line)?;
                 Ok(Value::Bool(left == right))
             }
+            Expr::NotEq(a, b) => {
+                let left = self.eval(a, line)?;
+                let right = self.eval(b, line)?;
+                Ok(Value::Bool(left != right))
+            }
             Expr::Call(name, args) => {
                 let mut values = Vec::new();
                 for arg in args {
@@ -270,6 +295,10 @@ impl Interp {
             }
             ("len", [Value::Str(text)]) => Ok(Value::Num(text.chars().count() as f64)),
             ("len", [Value::List(items)]) => Ok(Value::Num(items.len() as f64)),
+            ("trim", [Value::Str(text)]) => Ok(Value::Str(text.trim().to_string())),
+            ("concat", all) if !all.is_empty() => {
+                Ok(Value::Str(all.iter().map(|v| v.show()).collect::<String>()))
+            }
             ("read", [Value::Str(path)]) => {
                 self.require("read", path, line)?;
                 match std::fs::read_to_string(path) {
@@ -349,7 +378,7 @@ impl Interp {
                 "bad_call",
                 Some(line),
                 format!("unknown function or wrong arguments: {}(...) with {} argument(s)", name, args.len()),
-                "builtins: print(x), len(text or list), read(path), write(path, text), fetch(url)",
+                "builtins: print(x), len(text or list), trim(text), concat(a, b, ...), read(path), write(path, text), fetch(url)",
             )),
         }
     }

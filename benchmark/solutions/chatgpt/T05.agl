@@ -1,0 +1,2 @@
+needs read("data/a.txt")
+print(len(read("data/a.txt")))

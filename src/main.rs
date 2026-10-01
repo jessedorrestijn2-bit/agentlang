@@ -397,6 +397,61 @@ mod tests {
     }
 
     #[test]
+    fn if_takes_the_right_branch() {
+        let a = "if \"a\" == \"a\" { print(\"yes\") } else { print(\"no\") }";
+        let b = "if \"a\" == \"b\" { print(\"yes\") } else { print(\"no\") }";
+        assert_eq!(output_of(a), vec!["yes"]);
+        assert_eq!(output_of(b), vec!["no"]);
+    }
+
+    #[test]
+    fn if_without_else_and_not_equal() {
+        assert_eq!(output_of("if \"a\" != \"b\" { print(\"diff\") }"), vec!["diff"]);
+        assert!(output_of("if \"a\" != \"a\" { print(\"diff\") }").is_empty());
+    }
+
+    #[test]
+    fn if_needs_a_true_false_condition() {
+        assert_eq!(error_kind("if \"a\" { print(\"x\") }"), "not_a_condition");
+    }
+
+    #[test]
+    fn else_without_if_is_a_syntax_error() {
+        assert_eq!(error_kind("else { print(\"x\") }"), "syntax_error");
+    }
+
+    #[test]
+    fn needs_inside_if_is_rejected() {
+        assert_eq!(
+            error_kind("if \"a\" == \"a\" { needs read(\"a\") }"),
+            "needs_in_block"
+        );
+    }
+
+    #[test]
+    fn static_check_covers_both_branches() {
+        let src = "needs read(\"a.txt\")\nif \"a\" == \"b\" { print(\"x\") } else { let t = read(\"b.txt\") }";
+        let (interp, result) = run_source(src);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+    }
+
+    #[test]
+    fn concat_joins_values_and_trim_cleans_text() {
+        assert_eq!(output_of("print(concat(\"a\", \"-\", \"b\", 1))"), vec!["a-b1"]);
+        assert_eq!(output_of("print(trim(\"  hi \\n\"))"), vec!["hi"]);
+    }
+
+    #[test]
+    fn the_branch_taken_is_logged() {
+        let (interp, result) = run_source("if \"a\" == \"a\" { print(\"x\") } else { print(\"y\") }");
+        result.expect("program should succeed");
+        let entry = interp.log.iter().find(|e| e.action == "if").unwrap();
+        assert_eq!(entry.target, "then");
+    }
+
+    #[test]
     fn audit_log_detects_tampering() {
         let (interp, result) = run_source("needs read(\"a.txt\")\nverify 1 == 1");
         result.expect("program should succeed");

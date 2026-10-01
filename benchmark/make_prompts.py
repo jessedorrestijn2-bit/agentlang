@@ -8,7 +8,7 @@ Use the same prompt text for every model.
 
 from pathlib import Path
 
-from tasks import TASKS, build_prompt
+from tasks import TASKS, build_prompt, build_combined_prompt
 
 HERE = Path(__file__).resolve().parent
 spec = (HERE / "agentlang_spec.md").read_text()
@@ -19,4 +19,7 @@ for task in TASKS:
     (out / f"{task['id']}_python.md").write_text(build_prompt(task, "python"))
     (out / f"{task['id']}_agentlang.md").write_text(build_prompt(task, "agentlang", spec))
 
-print(f"Wrote {2 * len(TASKS)} prompts to {out}")
+(out / "ALL_python.md").write_text(build_combined_prompt("python"))
+(out / "ALL_agentlang.md").write_text(build_combined_prompt("agentlang", spec))
+
+print(f"Wrote {2 * len(TASKS)} single prompts and 2 combined prompts (ALL_*.md) to {out}")

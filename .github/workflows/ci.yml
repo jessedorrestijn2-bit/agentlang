@@ -25,7 +25,7 @@ jobs:
 
       - name: Example programs that must succeed
         run: |
-          for f in 01_hello 02_read_file 05_verify 06_for_loop; do
+          for f in 01_hello 02_read_file 05_verify 06_for_loop 10_if_and_concat; do
             echo "== $f"
             ./target/debug/agentlang examples/$f.agl
           done
@@ -44,4 +44,4 @@ jobs:
         run: |
           python3 benchmark/run.py benchmark/solutions/reference \
             --bin target/debug/agentlang \
-            --expect-python 10 --expect-agentlang 8
+            --expect-python 12 --expect-agentlang 12

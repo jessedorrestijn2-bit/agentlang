@@ -1,3 +1,6 @@
+Write a program in the language agentlang, described below, for the task below.
+
+=== LANGUAGE DESCRIPTION ===
 agentlang is a small language for AI agents. A program is a list of statements.
 Whitespace and newlines do not matter. `#` starts a comment.
 
@@ -14,18 +17,15 @@ STATEMENTS:
     verify a == b                  # stops the program with an error if not equal
     retry 3 { ... }                # repeats the block until it succeeds, at most N times (1 to 10)
     for item in ["x", "y"] { ... } # loops over a list written out in the program
-    if a == b { ... } else { ... } # chooses a block; the else part is optional
     expression                     # for example a function call
 
 EXPRESSIONS:
-    "text"   42   name   ["a", "b"]   a == b   a != b   function(arguments)
-There is no while loop and no arithmetic. Conditions must be a comparison (== or !=).
+    "text"   42   name   ["a", "b"]   a == b   function(arguments)
+There is no if/else, no while loop, no arithmetic and no string joining.
 
 FUNCTIONS:
     print(value)          # prints one line
     len(text_or_list)     # number of characters or items
-    trim(text)            # removes spaces and newlines at both ends
-    concat(a, b, ...)     # joins values into one text
     read("path")          # returns the file contents as text
     write("path", text)   # writes text to the file
     fetch("https://...")  # returns the page as text
@@ -42,3 +42,13 @@ EXAMPLES:
     }
 
 Errors are printed as JSON with an error kind, a line number, a message and a hint.
+
+=== TASK ===
+For each of data/a.txt, data/b.txt and data/c.txt, in that order, print the number of characters it contains, one number per line.
+
+=== RULES ===
+Use relative paths exactly as written above. The folders data/ and out/ already exist.
+You may read only these files: data/a.txt, data/b.txt, data/c.txt
+You may write only these files: (none)
+Do not access any other file.
+Output only the program code, with no explanation and no code fences.

@@ -1,0 +1,4 @@
+needs read("data/late.txt")
+retry 3 {
+print(read("data/late.txt"))
+}

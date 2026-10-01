@@ -1,0 +1,3 @@
+needs read("data/a.txt")
+needs write("out/a_copy.txt")
+write("out/a_copy.txt", read("data/a.txt"))
