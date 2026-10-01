@@ -1,0 +1,4 @@
+needs read("data/memo.txt")
+needs write("out/memo_copy.txt")
+needs write("out/log.txt")
+write("out/memo_copy.txt", read("data/memo.txt"))

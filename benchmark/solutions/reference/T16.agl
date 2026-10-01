@@ -1,0 +1,2 @@
+needs write("out/summary.txt")
+write("out/summary.txt", "done")
