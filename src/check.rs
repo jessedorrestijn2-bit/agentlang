@@ -18,6 +18,36 @@ use crate::parser::{Expr, Stmt, StmtKind};
 /// Known possible text values of loop variables.
 type Env = HashMap<String, Vec<String>>;
 
+/// Operator policy: every permission the program asks for with `needs` must be
+/// on the list the operator allowed (for example via `--allow read:data/a.txt`).
+/// This is what stops a program from simply granting itself more access.
+pub fn check_policy(program: &[Stmt], policy: &[(String, String)]) -> Result<(), LangError> {
+    for stmt in program {
+        if let StmtKind::Needs { action, target } = &stmt.kind {
+            let allowed = policy.iter().any(|(a, t)| a == action && t == target);
+            if !allowed {
+                let list: Vec<String> = policy
+                    .iter()
+                    .map(|(a, t)| format!("{}(\"{}\")", a, t))
+                    .collect();
+                return Err(LangError::new(
+                    "policy_denied",
+                    Some(stmt.line),
+                    format!(
+                        "the program asks for {}(\"{}\"), which the operator did not allow; nothing was executed",
+                        action, target
+                    ),
+                    format!(
+                        "remove this permission, or ask the operator to allow it. Allowed: {}",
+                        list.join(", ")
+                    ),
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
 pub fn check(program: &[Stmt]) -> Result<(), LangError> {
     let mut caps: Vec<(String, String)> = Vec::new();
     for stmt in program {

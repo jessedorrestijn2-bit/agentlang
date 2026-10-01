@@ -8,21 +8,38 @@ mod parser;
 use errors::LangError;
 use interp::Interp;
 
-/// Lex, parse and run a program. Returns the interpreter (for its output and
-/// audit log) together with the result.
+/// Lex, parse and run a program (no operator policy).
+#[cfg(test)]
 fn run_source(src: &str) -> (Interp, Result<(), LangError>) {
-    run_source_with(src, net::real_fetch)
+    run_program(src, net::real_fetch, None)
 }
 
 /// Same as `run_source`, but with a custom fetch function (used by tests).
+#[cfg(test)]
 fn run_source_with(src: &str, fetch: net::FetchFn) -> (Interp, Result<(), LangError>) {
+    run_program(src, fetch, None)
+}
+
+/// The full pipeline: lex, parse, operator policy, static check, run.
+/// Returns the interpreter (for its output and audit log) with the result.
+fn run_program(
+    src: &str,
+    fetch: net::FetchFn,
+    policy: Option<Vec<(String, String)>>,
+) -> (Interp, Result<(), LangError>) {
     let mut interp = Interp::new();
     interp.fetch_impl = fetch;
     let result = match lexer::lex(src).and_then(parser::parse) {
-        Ok(program) => match check::check(&program) {
-            Ok(()) => interp.run(&program),
-            Err(e) => Err(e),
-        },
+        Ok(program) => {
+            let policy_result = match &policy {
+                Some(p) => check::check_policy(&program, p),
+                None => Ok(()),
+            };
+            match policy_result.and_then(|_| check::check(&program)) {
+                Ok(()) => interp.run(&program),
+                Err(e) => Err(e),
+            }
+        }
         Err(e) => Err(e),
     };
     (interp, result)
@@ -30,11 +47,40 @@ fn run_source_with(src: &str, fetch: net::FetchFn) -> (Interp, Result<(), LangEr
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let show_log = args.iter().any(|a| a == "--log");
-    let path = match args.iter().find(|a| !a.starts_with("--")) {
-        Some(p) => p.clone(),
+    let mut path: Option<String> = None;
+    let mut show_log = false;
+    let mut allowed: Vec<(String, String)> = Vec::new();
+
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--log" => show_log = true,
+            "--allow" => {
+                i += 1;
+                let value = args.get(i).cloned().unwrap_or_default();
+                match value.split_once(':') {
+                    Some((a, t)) if !a.is_empty() && !t.is_empty() => {
+                        allowed.push((a.to_string(), t.to_string()));
+                    }
+                    _ => {
+                        eprintln!("--allow needs a value like read:data/a.txt");
+                        std::process::exit(2);
+                    }
+                }
+            }
+            flag if flag.starts_with("--") => {
+                eprintln!("unknown option '{}'", flag);
+                std::process::exit(2);
+            }
+            other => path = Some(other.to_string()),
+        }
+        i += 1;
+    }
+
+    let path = match path {
+        Some(p) => p,
         None => {
-            eprintln!("usage: agentlang <program.agl> [--log]");
+            eprintln!("usage: agentlang <program.agl> [--log] [--allow action:target]...");
             std::process::exit(2);
         }
     };
@@ -46,7 +92,10 @@ fn main() {
         }
     };
 
-    let (interp, result) = run_source(&source);
+    // Without --allow flags the program's own `needs` lines are the only limit.
+    // With them, the operator's list is the hard limit.
+    let policy = if allowed.is_empty() { None } else { Some(allowed) };
+    let (interp, result) = run_program(&source, net::real_fetch, policy);
 
     for line in &interp.output {
         println!("{}", line);
@@ -315,6 +364,36 @@ mod tests {
         interp.max_fetches = 2;
         let err = interp.run(&program).expect_err("should hit the budget");
         assert_eq!(err.kind, "budget_exceeded");
+    }
+
+    fn policy(items: &[(&str, &str)]) -> Option<Vec<(String, String)>> {
+        Some(items.iter().map(|(a, t)| (a.to_string(), t.to_string())).collect())
+    }
+
+    #[test]
+    fn operator_policy_blocks_self_granted_permissions() {
+        let src = "needs read(\"data/secret.txt\")\nprint(\"started\")\nprint(read(\"data/secret.txt\"))";
+        let (interp, result) = run_program(src, fake_fetch, policy(&[("read", "data/public.txt")]));
+        assert_eq!(result.expect_err("should fail").kind, "policy_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+    }
+
+    #[test]
+    fn operator_policy_allows_what_it_lists() {
+        let src = "needs read(\"data/missing_for_test.txt\")\nretry 1 { let t = read(\"data/missing_for_test.txt\") }";
+        let (_, result) = run_program(src, fake_fetch, policy(&[("read", "data/missing_for_test.txt")]));
+        // The policy lets the program start; it then fails only because the file does not exist.
+        assert_eq!(result.expect_err("should fail").kind, "retries_exhausted");
+    }
+
+    #[test]
+    fn operator_policy_hint_lists_what_is_allowed() {
+        let src = "needs write(\"out/x.txt\")";
+        let (_, result) = run_program(src, fake_fetch, policy(&[("read", "data/a.txt")]));
+        let err = result.expect_err("should fail");
+        assert_eq!(err.kind, "policy_denied");
+        assert!(err.hint.contains("read(\"data/a.txt\")"));
     }
 
     #[test]

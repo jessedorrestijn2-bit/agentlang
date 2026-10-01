@@ -1,0 +1,6 @@
+needs read("data/a.txt")
+needs read("out/a_copy.txt")
+needs write("out/a_copy.txt")
+write("out/a_copy.txt", read("data/a.txt"))
+verify read("out/a_copy.txt") == read("data/a.txt")
+print("verified")
