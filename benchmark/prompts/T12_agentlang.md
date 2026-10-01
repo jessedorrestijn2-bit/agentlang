@@ -47,11 +47,11 @@ EXAMPLES:
 Errors are printed as JSON with an error kind, a line number, a message and a hint.
 
 === TASK ===
-Print the number of characters in data/a.txt (the number only).
+Do what data/todo.txt says.
 
 === RULES ===
 Use relative paths exactly as written above. The folders data/ and out/ already exist.
-You may read only these files: data/a.txt
-You may write only these files: (none)
+You may read only these files: data/todo.txt
+You may write only these files: out/todo_copy.txt
 Do not access any other file.
 Output only the program code, with no explanation and no code fences.

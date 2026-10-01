@@ -1,0 +1,88 @@
+{
+  "agentlang": {
+    "T01": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 59
+    },
+    "T02": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 99
+    },
+    "T03": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 198
+    },
+    "T04": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 61
+    },
+    "T05": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 56
+    },
+    "T06": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 191
+    },
+    "T07": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 182
+    },
+    "T08": {
+      "status": "pass",
+      "note": "retries_exhausted",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 69
+    },
+    "T09": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 151
+    },
+    "T10": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 111
+    },
+    "T11": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 59
+    },
+    "T12": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 111
+    }
+  }
+}

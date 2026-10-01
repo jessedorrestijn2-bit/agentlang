@@ -17,15 +17,18 @@ STATEMENTS:
     verify a == b                  # stops the program with an error if not equal
     retry 3 { ... }                # repeats the block until it succeeds, at most N times (1 to 10)
     for item in ["x", "y"] { ... } # loops over a list written out in the program
+    if a == b { ... } else { ... } # chooses a block; the else part is optional
     expression                     # for example a function call
 
 EXPRESSIONS:
-    "text"   42   name   ["a", "b"]   a == b   function(arguments)
-There is no if/else, no while loop, no arithmetic and no string joining.
+    "text"   42   name   ["a", "b"]   a == b   a != b   function(arguments)
+There is no while loop and no arithmetic. Conditions must be a comparison (== or !=).
 
 FUNCTIONS:
     print(value)          # prints one line
     len(text_or_list)     # number of characters or items
+    trim(text)            # removes spaces and newlines at both ends
+    concat(a, b, ...)     # joins values into one text
     read("path")          # returns the file contents as text
     write("path", text)   # writes text to the file
     fetch("https://...")  # returns the page as text

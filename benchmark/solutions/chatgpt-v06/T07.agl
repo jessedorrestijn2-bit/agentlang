@@ -1,0 +1,7 @@
+needs read("data/flag.txt")
+needs write("out/result.txt")
+if trim(read("data/flag.txt")) == "yes" {
+write("out/result.txt", "enabled")
+} else {
+write("out/result.txt", "disabled")
+}
