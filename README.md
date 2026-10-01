@@ -10,13 +10,14 @@ sandbox on afterwards, the things agents need are part of the language:
 4. **Every action is logged** in a hash-chained audit log that can be checked for tampering.
 5. **Errors are structured JSON** with a kind, a line, a message and a concrete hint,
    so a model can feed them back and repair its own program.
-6. **There are no loops yet**, so every program terminates.
+6. **Every program terminates.** The only repetition is `retry` (fixed limit) and `for`
+   over a finite list. There is no `while`.
 
-## Status (v0.2)
+## Status (v0.3)
 
 This is an early skeleton: lexer, parser, static permission check, interpreter, tests
-and five examples. v0.1 compiled and passed its 13 tests in Codespaces; the static
-check added in v0.2 still needs its first `cargo test`.
+and seven examples. v0.2 passed its 14 tests in Codespaces; v0.3 (lists and `for`
+loops, 20 tests) still needs its first `cargo test`.
 
 ## Syntax
 
@@ -32,9 +33,13 @@ verify len(text) == 10         # stop the program if false
 retry 3 {                      # bounded retry, never repeats a missing permission
   let t = read("maybe.txt")
 }
+
+for f in ["a.txt", "b.txt"] {  # loops over a finite list, always stops
+  print(read(f))
+}
 ```
 
-Values are text, numbers and booleans. `==` compares two values.
+Values are text, numbers, booleans and lists. `==` compares two values.
 
 ## Run it
 
@@ -47,6 +52,8 @@ cargo run -- examples/01_hello.agl           # run a program
 cargo run -- examples/02_read_file.agl --log # also print the audit log
 cargo run -- examples/03_denied.agl          # must fail with capability_denied
 cargo run -- examples/04_retry.agl           # must fail with retries_exhausted
+cargo run -- examples/06_for_loop.agl        # loops over two files
+cargo run -- examples/07_for_denied.agl      # refused before anything runs
 ```
 
 Example of a refused program (stderr):
@@ -58,8 +65,9 @@ Example of a refused program (stderr):
 ## Known limitations
 
 - The audit log uses Rust's `DefaultHasher`. That is a placeholder, not secure. Use SHA-256.
-- Permissions are checked before running for literal paths (`src/check.rs`). Paths that
-  are only known at runtime, such as a variable, are still checked while running.
+- Permissions are checked before running for literal paths and for loop variables over a
+  literal list (`src/check.rs`). Other paths, such as a variable that holds a result, are
+  still only checked while running.
 - No network access, no parallel calls, no memory, no sub-agents yet.
 - Nested `retry` blocks multiply their attempts.
 
@@ -67,7 +75,8 @@ Example of a refused program (stderr):
 
 1. Make it compile and pass `cargo test`.
 2. ~~Add a static permission check before execution.~~ Done in v0.2.
-3. Add `fetch(url)` with domain permissions, then parallel calls with a time and cost budget.
+3. ~~Lists and `for` loops.~~ Done in v0.3. Next: `fetch(url)` with domain permissions,
+   then parallel calls with a time and cost budget.
 4. Add persistent memory with its own permission, then delegation where permissions can only shrink.
 5. Replay: re-run an audit log deterministically and report where results differ.
 6. Benchmark: the same agent tasks in this language and in Python, measuring errors and tokens.
