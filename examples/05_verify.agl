@@ -1,0 +1,8 @@
+# Verification is part of the language: the program only continues
+# if both reads agree.
+needs read("examples/notes.txt")
+
+let first = read("examples/notes.txt")
+let second = read("examples/notes.txt")
+verify first == second
+print("verified: both reads agree")

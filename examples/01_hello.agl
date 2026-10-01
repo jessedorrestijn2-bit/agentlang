@@ -1,0 +1,2 @@
+# The smallest program: printing needs no permission.
+print("hello from agentlang")

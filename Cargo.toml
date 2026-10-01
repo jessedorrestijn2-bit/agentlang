@@ -1,0 +1,7 @@
+[package]
+name = "agentlang"
+version = "0.1.0"
+edition = "2021"
+description = "A tiny language for AI agents: permissions, bounded retries, verification and a tamper-evident log are part of the language itself."
+
+[dependencies]
