@@ -12,12 +12,11 @@ sandbox on afterwards, the things agents need are part of the language:
    so a model can feed them back and repair its own program.
 6. **There are no loops yet**, so every program terminates.
 
-## Status (v0.1)
+## Status (v0.2)
 
-This is a first skeleton: lexer, parser, interpreter, tests and five examples.
-**It has not been compiled or run yet.** It was written without access to a Rust
-compiler, so expect a few small compile errors on the first `cargo build`.
-Fixing those is step one (see below).
+This is an early skeleton: lexer, parser, static permission check, interpreter, tests
+and five examples. v0.1 compiled and passed its 13 tests in Codespaces; the static
+check added in v0.2 still needs its first `cargo test`.
 
 ## Syntax
 
@@ -59,15 +58,15 @@ Example of a refused program (stderr):
 ## Known limitations
 
 - The audit log uses Rust's `DefaultHasher`. That is a placeholder, not secure. Use SHA-256.
-- Permissions are checked while running, not before. A static check that rejects the
-  whole program before it starts is the next improvement.
+- Permissions are checked before running for literal paths (`src/check.rs`). Paths that
+  are only known at runtime, such as a variable, are still checked while running.
 - No network access, no parallel calls, no memory, no sub-agents yet.
 - Nested `retry` blocks multiply their attempts.
 
 ## Roadmap
 
 1. Make it compile and pass `cargo test`.
-2. Add a static permission check before execution.
+2. ~~Add a static permission check before execution.~~ Done in v0.2.
 3. Add `fetch(url)` with domain permissions, then parallel calls with a time and cost budget.
 4. Add persistent memory with its own permission, then delegation where permissions can only shrink.
 5. Replay: re-run an audit log deterministically and report where results differ.
