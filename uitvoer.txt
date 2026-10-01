@@ -1,20 +1,7 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
-     Running unittests src/main.rs (target/debug/deps/agentlang-cc6022388312276e)
+{"error":"capability_denied","line":4,"message":"read(\"examples/secret.txt\") is not permitted","hint":"add this line at the top of the program: needs read(\"examples/secret.txt\")"}
+Remember: agents should ask a human before sending email.
 
-running 13 tests
-test tests::audit_log_detects_tampering ... ok
-test tests::len_counts_characters ... ok
-test tests::needs_must_come_first ... ok
-test tests::prints_text ... ok
-test tests::permission_is_exact ... ok
-test tests::read_without_permission_is_denied ... ok
-test tests::retry_does_not_repeat_denied_actions ... ok
-test tests::retry_needs_a_bounded_number ... ok
-test tests::retry_gives_up_after_limit ... ok
-test tests::unterminated_string_is_reported ... ok
-test tests::unknown_variable_is_reported ... ok
-test tests::verify_passes_and_fails ... ok
-test tests::write_then_read_roundtrip ... ok
-
-test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
+58
+--- audit log (chain valid: true) ---
+#0 needs read(examples/notes.txt) ok=true hash=581a12b9f9e6f6ba
+#1 read examples/notes.txt ok=true hash=578c4c1bdba098f0
