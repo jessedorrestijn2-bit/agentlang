@@ -12,6 +12,8 @@ pub enum Tok {
     RParen,
     LBrace,
     RBrace,
+    LBracket,
+    RBracket,
     Comma,
     Assign,
     EqEq,
@@ -102,6 +104,8 @@ pub fn lex(src: &str) -> Result<Vec<Token>, LangError> {
                 ')' => Tok::RParen,
                 '{' => Tok::LBrace,
                 '}' => Tok::RBrace,
+                '[' => Tok::LBracket,
+                ']' => Tok::RBracket,
                 ',' => Tok::Comma,
                 '=' => {
                     if i + 1 < chars.len() && chars[i + 1] == '=' {

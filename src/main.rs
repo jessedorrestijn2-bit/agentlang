@@ -166,6 +166,57 @@ mod tests {
     }
 
     #[test]
+    fn for_loop_visits_every_item() {
+        assert_eq!(
+            output_of("for x in [\"a\", \"b\", \"c\"] { print(x) }"),
+            vec!["a", "b", "c"]
+        );
+    }
+
+    #[test]
+    fn len_counts_list_items() {
+        assert_eq!(output_of("print(len([\"a\", \"b\"]))"), vec!["2"]);
+    }
+
+    #[test]
+    fn for_loop_can_write_several_files() {
+        let a = std::env::temp_dir().join("agentlang_loop_a.txt");
+        let b = std::env::temp_dir().join("agentlang_loop_b.txt");
+        let pa = a.to_string_lossy().replace('\\', "/");
+        let pb = b.to_string_lossy().replace('\\', "/");
+        let src = format!(
+            "needs write(\"{pa}\")\nneeds write(\"{pb}\")\nfor p in [\"{pa}\", \"{pb}\"] {{ write(p, \"x\") }}\nprint(\"done\")"
+        );
+        assert_eq!(output_of(&src), vec!["done"]);
+        assert!(a.exists());
+        assert!(b.exists());
+        let _ = std::fs::remove_file(a);
+        let _ = std::fs::remove_file(b);
+    }
+
+    #[test]
+    fn static_check_looks_through_literal_lists() {
+        let src = "needs read(\"a.txt\")\nprint(\"started\")\nfor p in [\"a.txt\", \"b.txt\"] { let t = read(p) }";
+        let (interp, result) = run_source(src);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+    }
+
+    #[test]
+    fn for_needs_a_list() {
+        assert_eq!(error_kind("for x in \"abc\" { print(x) }"), "not_a_list");
+    }
+
+    #[test]
+    fn needs_inside_for_is_rejected() {
+        assert_eq!(
+            error_kind("for x in [\"a\"] { needs read(\"a\") }"),
+            "needs_in_block"
+        );
+    }
+
+    #[test]
     fn audit_log_detects_tampering() {
         let (interp, result) = run_source("needs read(\"a.txt\")\nverify 1 == 1");
         result.expect("program should succeed");

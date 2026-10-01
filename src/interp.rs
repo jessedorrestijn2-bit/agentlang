@@ -16,6 +16,7 @@ pub enum Value {
     Str(String),
     Num(f64),
     Bool(bool),
+    List(Vec<Value>),
     Nothing,
 }
 
@@ -31,6 +32,10 @@ impl Value {
                 }
             }
             Value::Bool(b) => b.to_string(),
+            Value::List(items) => {
+                let shown: Vec<String> = items.iter().map(|v| v.show()).collect();
+                format!("[{}]", shown.join(", "))
+            }
             Value::Nothing => "nothing".to_string(),
         }
     }
@@ -145,6 +150,28 @@ impl Interp {
                 }
             }
             StmtKind::Retry(times, body) => self.retry(*times, body, stmt.line),
+            StmtKind::For(var, list_expr, body) => {
+                let list = self.eval(list_expr, stmt.line)?;
+                let items = match list {
+                    Value::List(items) => items,
+                    other => {
+                        return Err(LangError::new(
+                            "not_a_list",
+                            Some(stmt.line),
+                            format!("for needs a list but got {}", other.show()),
+                            "write a list like [\"a.txt\", \"b.txt\"]",
+                        ))
+                    }
+                };
+                self.record("for", &format!("{} items", items.len()), true);
+                for item in items {
+                    self.vars.insert(var.clone(), item);
+                    for inner in body {
+                        self.exec(inner)?;
+                    }
+                }
+                Ok(())
+            }
         }
     }
 
@@ -190,6 +217,13 @@ impl Interp {
                     format!("define it first with: let {} = ...", name),
                 )
             }),
+            Expr::List(items) => {
+                let mut values = Vec::new();
+                for item in items {
+                    values.push(self.eval(item, line)?);
+                }
+                Ok(Value::List(values))
+            }
             Expr::Eq(a, b) => {
                 let left = self.eval(a, line)?;
                 let right = self.eval(b, line)?;
@@ -226,6 +260,7 @@ impl Interp {
                 Ok(Value::Nothing)
             }
             ("len", [Value::Str(text)]) => Ok(Value::Num(text.chars().count() as f64)),
+            ("len", [Value::List(items)]) => Ok(Value::Num(items.len() as f64)),
             ("read", [Value::Str(path)]) => {
                 self.require("read", path, line)?;
                 match std::fs::read_to_string(path) {
@@ -266,7 +301,7 @@ impl Interp {
                 "bad_call",
                 Some(line),
                 format!("unknown function or wrong arguments: {}(...) with {} argument(s)", name, args.len()),
-                "builtins: print(x), len(text), read(path), write(path, text)",
+                "builtins: print(x), len(text or list), read(path), write(path, text)",
             )),
         }
     }

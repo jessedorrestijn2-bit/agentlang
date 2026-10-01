@@ -1,8 +1,9 @@
 //! Parser: tokens -> syntax tree.
 //!
-//! Two rules are enforced here, before anything runs:
+//! Rules enforced here, before anything runs:
 //!   1. `needs` (permission) lines may only appear at the top of a program.
 //!   2. `retry` must have a fixed upper limit between 1 and MAX_RETRIES.
+//!   3. `for` only loops over a finite list, so it always stops.
 
 use crate::errors::LangError;
 use crate::lexer::{Tok, Token};
@@ -14,6 +15,7 @@ pub enum Expr {
     Str(String),
     Num(f64),
     Var(String),
+    List(Vec<Expr>),
     Call(String, Vec<Expr>),
     Eq(Box<Expr>, Box<Expr>),
 }
@@ -25,6 +27,7 @@ pub enum StmtKind {
     Do(Expr),
     Verify(Expr),
     Retry(u32, Vec<Stmt>),
+    For(String, Expr, Vec<Stmt>),
 }
 
 #[derive(Debug, Clone)]
@@ -129,6 +132,10 @@ impl Parser {
                 self.next();
                 self.retry()?
             }
+            Tok::Ident(word) if word == "for" => {
+                self.next();
+                self.for_stmt()?
+            }
             _ => StmtKind::Do(self.expr()?),
         };
         Ok(Stmt { line, kind })
@@ -168,19 +175,8 @@ impl Parser {
         Ok(StmtKind::Let(name, value))
     }
 
-    fn retry(&mut self) -> Result<StmtKind, LangError> {
-        let line = self.line();
-        let times = match self.next().tok {
-            Tok::Num(n) if n.fract() == 0.0 && n >= 1.0 && n <= MAX_RETRIES as f64 => n as u32,
-            _ => {
-                return Err(LangError::new(
-                    "invalid_retry",
-                    Some(line),
-                    format!("retry needs a whole number between 1 and {}", MAX_RETRIES),
-                    "every retry has a fixed upper limit, for example: retry 3 { ... }",
-                ))
-            }
-        };
+    /// Parses `{ statements }`. Permissions cannot be declared inside a block.
+    fn block(&mut self, line: usize) -> Result<Vec<Stmt>, LangError> {
         self.expect(Tok::LBrace, "'{'")?;
         let mut body = Vec::new();
         while *self.peek() != Tok::RBrace {
@@ -188,7 +184,7 @@ impl Parser {
                 return Err(LangError::new(
                     "syntax_error",
                     Some(line),
-                    "this retry block is never closed",
+                    "this block is never closed",
                     "add a } at the end of the block",
                 ));
             }
@@ -204,7 +200,43 @@ impl Parser {
             body.push(stmt);
         }
         self.expect(Tok::RBrace, "'}'")?;
+        Ok(body)
+    }
+
+    fn retry(&mut self) -> Result<StmtKind, LangError> {
+        let line = self.line();
+        let times = match self.next().tok {
+            Tok::Num(n) if n.fract() == 0.0 && n >= 1.0 && n <= MAX_RETRIES as f64 => n as u32,
+            _ => {
+                return Err(LangError::new(
+                    "invalid_retry",
+                    Some(line),
+                    format!("retry needs a whole number between 1 and {}", MAX_RETRIES),
+                    "every retry has a fixed upper limit, for example: retry 3 { ... }",
+                ))
+            }
+        };
+        let body = self.block(line)?;
         Ok(StmtKind::Retry(times, body))
+    }
+
+    fn for_stmt(&mut self) -> Result<StmtKind, LangError> {
+        let line = self.line();
+        let var = self.ident("a loop variable name")?;
+        match self.next().tok {
+            Tok::Ident(word) if word == "in" => {}
+            other => {
+                return Err(LangError::new(
+                    "syntax_error",
+                    Some(line),
+                    format!("expected 'in' but found {:?}", other),
+                    "write it like: for item in [\"a\", \"b\"] { ... }",
+                ))
+            }
+        }
+        let list = self.expr()?;
+        let body = self.block(line)?;
+        Ok(StmtKind::For(var, list, body))
     }
 
     fn expr(&mut self) -> Result<Expr, LangError> {
@@ -222,6 +254,21 @@ impl Parser {
         match self.next().tok {
             Tok::Str(s) => Ok(Expr::Str(s)),
             Tok::Num(n) => Ok(Expr::Num(n)),
+            Tok::LBracket => {
+                let mut items = Vec::new();
+                if *self.peek() != Tok::RBracket {
+                    loop {
+                        items.push(self.expr()?);
+                        if *self.peek() == Tok::Comma {
+                            self.next();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                self.expect(Tok::RBracket, "']'")?;
+                Ok(Expr::List(items))
+            }
             Tok::Ident(name) => {
                 if *self.peek() == Tok::LParen {
                     self.next();
@@ -246,7 +293,7 @@ impl Parser {
                 "syntax_error",
                 Some(line),
                 format!("expected a value but found {:?}", other),
-                "a value is a \"text\", a number, a variable, or a call like read(\"file.txt\")",
+                "a value is a \"text\", a number, a [list], a variable, or a call like read(\"file.txt\")",
             )),
         }
     }
