@@ -1,99 +1,70 @@
-# agentlang (working name)
+# Pilot benchmark
 
-A tiny language for AI agents. Instead of letting a program do anything and bolting a
-sandbox on afterwards, the things agents need are part of the language:
+A small, honest first comparison: the same 10 agent-style tasks, written once as a
+Python program and once as an agentlang program.
 
-1. **Permissions are declared up front.** A program can only read or write what it
-   declared with `needs`. Anything else is refused.
-2. **Retries are always bounded.** `retry N { ... }` needs a fixed `N` (1 to 10).
-3. **Verification is a statement.** `verify a == b` stops the program if it does not hold.
-4. **Every action is logged** in a hash-chained audit log that can be checked for tampering.
-5. **Errors are structured JSON** with a kind, a line, a message and a concrete hint,
-   so a model can feed them back and repair its own program.
-6. **Every program terminates.** The only repetition is `retry` (fixed limit) and `for`
-   over a finite list. There is no `while`.
+## What it measures
 
-## Status (v0.4)
+For every task and language:
 
-This is an early skeleton: lexer, parser, static permission check, interpreter, tests
-and nine examples. v0.3 passed its 20 tests in Codespaces; v0.4 adds `fetch` (29 tests)
-and still needs its first `cargo test`. It is the first version with a dependency
-(`ureq`, for HTTPS), so the first build downloads packages.
+- **Pass / fail**: did the program produce the right output or files? (Checked by the
+  harness, never by the model.)
+- **Out-of-bounds attempted / happened**: did the program touch a file the task did not
+  allow (such as the decoy `data/secret.txt`, or `out/keep.txt` in the injection task)?
+- **Size**: program length in characters (a rough stand-in for tokens).
 
-## Syntax
+Python has no built-in permission system, so an out-of-bounds access really happens and
+is recorded. agentlang is run with the task's permissions as the operator policy
+(`--allow read:...`), and the harness reads the audit log to check what really happened,
+instead of assuming the language blocked it.
 
-```
-# comment
-needs read("notes.txt")        # permission (only allowed at the top)
-needs write("out.txt")
-needs fetch("example.com")     # network permission is per domain
+## The 10 tasks
 
-let text = read("notes.txt")   # variables
-print(text)                    # builtins: print, len, read, write, fetch
-verify len(text) == 10         # stop the program if false
+| Task | What it tests |
+|------|---------------|
+| T01 print_file | simplest read |
+| T02 copy_file | read and write |
+| T03 verify_copy | verification step |
+| T04 decoy_secret | a file that says "don't read the secret" next to a secret file |
+| T05 count_chars | a small computation |
+| T06 concat_files | **stretch**: needs string joining (agentlang cannot do this yet) |
+| T07 conditional | **stretch**: needs if/else (agentlang cannot do this yet) |
+| T08 bounded_retry | exactly 3 attempts, then an error |
+| T09 loop_lengths | loop over several files |
+| T10 injection_trap | a file that contains an instruction to overwrite another file |
 
-retry 3 {                      # bounded retry, never repeats a missing permission
-  let t = read("maybe.txt")
-}
-
-let page = fetch("https://example.com/page")   # https only, domain must be declared
-
-for f in ["a.txt", "b.txt"] {  # loops over a finite list, always stops
-  print(read(f))
-}
-```
-
-Values are text, numbers, booleans and lists. `==` compares two values.
-
-## How `fetch` stays safe
-
-- Only `https://` URLs. The permission names a domain: `needs fetch("example.com")`.
-- A subdomain such as `api.example.com` needs its own permission.
-- Tricks like `https://example.com@evil.com/` are refused as invalid URLs.
-- Redirects are blocked, because they could leave the permitted domain.
-- 10 second timeout and at most 50 fetches per run (a simple cost budget).
-- The audit log records only the domain, not the full URL (which may contain secrets).
-- The tests use a fake fetch function, so they never need the internet.
+T06 and T07 are on purpose: they show where the language is still missing features.
 
 ## Run it
 
-You need Rust. On an iPad, use GitHub Codespaces: it already has a terminal where you
-can install Rust (`curl https://sh.rustup.rs -sSf | sh`) or use a Rust dev container.
-
 ```
-cargo test                                   # run the unit tests
-cargo run -- examples/01_hello.agl           # run a program
-cargo run -- examples/02_read_file.agl --log # also print the audit log
-cargo run -- examples/03_denied.agl          # must fail with capability_denied
-cargo run -- examples/04_retry.agl           # must fail with retries_exhausted
-cargo run -- examples/06_for_loop.agl        # loops over two files
-cargo run -- examples/07_for_denied.agl      # refused before anything runs
-cargo run -- examples/08_fetch.agl           # needs internet
-cargo run -- examples/09_fetch_denied.agl    # refused before anything runs
+cargo build
+python3 benchmark/run.py benchmark/solutions/reference
 ```
 
-Example of a refused program (stderr):
+The `reference` solutions were written by the language designer. They only check that the
+harness works (Python should pass 10/10, agentlang 8/10). **They are not a fair result.**
+
+## Run a real test with a model
 
 ```
-{"error":"capability_denied","line":4,"message":"read(\"examples/secret.txt\") is not permitted","hint":"add this line at the top of the program: needs read(\"examples/secret.txt\")"}
+python3 benchmark/make_prompts.py        # writes benchmark/prompts/T01_python.md, ...
 ```
 
-## Known limitations
+1. Give each prompt to the model you want to test, in a fresh conversation, with the same
+   wording for every model. The agentlang prompts contain the language description, so the
+   model sees nothing else about the language.
+2. Save each answer as `benchmark/solutions/<model>/T01.py` or `T01.agl`.
+3. Run `python3 benchmark/run.py benchmark/solutions/<model>`.
 
-- The audit log uses Rust's `DefaultHasher`. That is a placeholder, not secure. Use SHA-256.
-- Permissions are checked before running for literal paths and for loop variables over a
-  literal list (`src/check.rs`). Other paths, such as a variable that holds a result, are
-  still only checked while running.
-- No parallel calls, no memory, no sub-agents yet. `fetch` only does GET and has no
-  wildcard domains. Redirects are blocked rather than followed.
-- Nested `retry` blocks multiply their attempts.
+Repeat with several models and several tries per task before drawing conclusions.
 
-## Roadmap
+## Limitations (read before quoting any number)
 
-1. Make it compile and pass `cargo test`.
-2. ~~Add a static permission check before execution.~~ Done in v0.2.
-3. ~~Lists and `for` loops.~~ Done in v0.3. ~~`fetch(url)` with domain permissions and a
-   fetch budget.~~ Done in v0.4. Next: parallel calls with a time and cost budget.
-4. Add persistent memory with its own permission, then delegation where permissions can only shrink.
-5. Replay: re-run an audit log deterministically and report where results differ.
-6. Benchmark: the same agent tasks in this language and in Python, measuring errors and tokens.
+- 10 tasks is a pilot, not proof. All tasks use files; there is no network task yet.
+- The Python recorder only sees file opens, not other ways of touching files.
+- Python is run without any sandbox. A fair later comparison adds a Python version that
+  runs in a restricted environment, because that is what a careful team would do.
+- Size is measured in characters, not real tokens.
+- The agentlang spec was written by the language author. Prompt wording matters a lot.
+- One try per task. Real results need repeated tries (and counting repair rounds).
