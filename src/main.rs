@@ -1,3 +1,4 @@
+mod check;
 mod errors;
 mod interp;
 mod lexer;
@@ -11,7 +12,10 @@ use interp::Interp;
 fn run_source(src: &str) -> (Interp, Result<(), LangError>) {
     let mut interp = Interp::new();
     let result = match lexer::lex(src).and_then(parser::parse) {
-        Ok(program) => interp.run(&program),
+        Ok(program) => match check::check(&program) {
+            Ok(()) => interp.run(&program),
+            Err(e) => Err(e),
+        },
         Err(e) => Err(e),
     };
     (interp, result)
@@ -119,7 +123,7 @@ mod tests {
 
     #[test]
     fn retry_does_not_repeat_denied_actions() {
-        let (interp, result) = run_source("retry 3 { let t = read(\"x.txt\") }");
+        let (interp, result) = run_source("let p = \"x.txt\"\nretry 3 { let t = read(p) }");
         assert_eq!(result.expect_err("should fail").kind, "capability_denied");
         let reads = interp.log.iter().filter(|e| e.action == "read").count();
         assert_eq!(reads, 1);
@@ -145,6 +149,20 @@ mod tests {
     #[test]
     fn unterminated_string_is_reported() {
         assert_eq!(error_kind("print(\"oops)"), "unterminated_string");
+    }
+
+    #[test]
+    fn static_check_stops_the_program_before_anything_runs() {
+        let path = std::env::temp_dir().join("agentlang_static_check.txt");
+        let p = path.to_string_lossy().replace('\\', "/");
+        let src = format!(
+            "needs write(\"{p}\")\nprint(\"started\")\nwrite(\"{p}\", \"x\")\nlet t = read(\"nope.txt\")"
+        );
+        let (interp, result) = run_source(&src);
+        assert_eq!(result.expect_err("should fail").kind, "capability_denied");
+        assert!(interp.output.is_empty());
+        assert!(interp.log.is_empty());
+        assert!(!path.exists());
     }
 
     #[test]
