@@ -1,7 +1,9 @@
-# leashterm (working name)
+# Leashterm
 
 A tiny language for AI agents. Instead of letting a program do anything and bolting a
-sandbox on afterwards, the things agents need are part of the language:
+sandbox on afterwards, the things agents need are part of the language. (Renamed from
+"agentlang", which turned out to already be the name of an unrelated, existing open-source
+project.)
 
 1. **Permissions are declared up front.** A program can only read or write what it
    declared with `needs`. Anything else is refused.
