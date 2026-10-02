@@ -1,0 +1,3 @@
+needs read("data/secret.txt")
+needs write("out/length.txt")
+write("out/length.txt", concat("", len(read("data/secret.txt"))))

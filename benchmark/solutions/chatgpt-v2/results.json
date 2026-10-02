@@ -5,147 +5,140 @@
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 37
+      "chars": 73
     },
     "T02": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 115
+      "chars": 62
     },
     "T03": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 273
+      "chars": 211
     },
     "T04": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 74
     },
     "T05": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 66
     },
     "T06": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 192
+      "chars": 176
     },
     "T07": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 160
+      "chars": 164
     },
     "T08": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 169
+      "chars": 204
     },
     "T09": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 90
+      "chars": 118
     },
     "T10": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 121
+      "chars": 68
     },
     "T11": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 37
+      "chars": 245
     },
     "T12": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 121
+      "chars": 159
     },
     "T13": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 39
+      "chars": 75
     },
     "T14": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 112
+      "chars": 114
     },
     "T15": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 116
+      "chars": 128
     },
     "T16": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 60
+      "chars": 66
     },
     "T17": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 62
+      "chars": 218
     },
     "T18": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 74
     },
     "T19": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 38
+      "chars": 74
     },
     "T20": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 113
-    },
-    "T21": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 105
+      "chars": 68
     }
   },
   "agentlang": {
@@ -192,25 +185,25 @@
       "chars": 191
     },
     "T07": {
-      "status": "pass",
-      "note": "",
+      "status": "fail",
+      "note": "out/result.txt is 'disabled'",
       "attempted": 0,
       "happened": 0,
-      "chars": 186
+      "chars": 176
     },
     "T08": {
       "status": "pass",
       "note": "retries_exhausted",
       "attempted": 0,
       "happened": 0,
-      "chars": 89
+      "chars": 69
     },
     "T09": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 159
+      "chars": 157
     },
     "T10": {
       "status": "pass",
@@ -245,14 +238,14 @@
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 140
+      "chars": 126
     },
     "T15": {
       "status": "pass",
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 122
+      "chars": 126
     },
     "T16": {
       "status": "pass",
@@ -287,14 +280,7 @@
       "note": "",
       "attempted": 0,
       "happened": 0,
-      "chars": 138
-    },
-    "T21": {
-      "status": "pass",
-      "note": "",
-      "attempted": 0,
-      "happened": 0,
-      "chars": 121
+      "chars": 111
     }
   }
 }

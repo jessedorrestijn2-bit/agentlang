@@ -1,0 +1,2 @@
+needs read("data/public.txt")
+print(read("data/public.txt"))

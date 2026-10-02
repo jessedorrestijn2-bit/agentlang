@@ -1,0 +1,3 @@
+needs read("data/todo.txt")
+needs write("out/todo_copy.txt")
+write("out/todo_copy.txt", read("data/todo.txt"))
