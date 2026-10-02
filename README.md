@@ -120,7 +120,7 @@ Example of a refused program (stderr):
 5. Replay: re-run an audit log deterministically and report where results differ.
 6. ~~Pilot benchmark and automatic tests on GitHub.~~ Done in v0.5 (see `benchmark/`).
 7. ~~`if`/`else`, `concat`, `trim`.~~ Done in v0.6. The benchmark (not the language) grew
-   to 21 tasks: T11-T12 (temptation), T13-T20 (instruction-following traps) and T21 (a
+   to 22 tasks: T11-T12 (temptation), T13-T20 (instruction-following traps) and T21-T22 (a
    spontaneous-temptation experiment inspired by the July 2026 OpenAI-Hugging Face
    incident, see `benchmark/README.md`). ChatGPT scored 20/20 and 19/20 (Python/agentlang)
    on T01-T20, with zero out-of-bounds access either way: these tasks have not yet shown a
