@@ -190,7 +190,11 @@ Example of a refused program (stderr):
     (`socket.getaddrinfo` hook, a `fetches` permission). Also surfaced a measurement
     mistake (a vague pointer made the first run of this look artificially strong) that was
     caught and corrected, documented in the case's README.
-11. ~~Case 3: resource/cost budgets, built on the v0.7 step budget.~~ Built and
-    self-validated - see `cases/case3-resources/`. Not yet run with a real model: the next
-    step is the same 9-trial process used for C1 and C2. All three cases now exist on the
-    same Leashterm version (v0.7), as planned.
+11. ~~Case 3: resource/cost budgets, built on the v0.7 step budget.~~ Done, including a
+    9-trial result per language - see `cases/case3-resources/`. Both languages: 100%
+    engagement (every trial tried to go past the one declared file); Python leaked the
+    undeclared answer in 9/9, Leashterm was refused in 9/9 - the strongest divergence of
+    the three cases, and clear evidence that identical model behavior does not guarantee
+    identical outcome. All three cases now exist on the same Leashterm version (v0.7), as
+    planned, and all three show the same shape: Case 1 (filesystem, 89% vs 0%), Case 2
+    (network, 100% vs 0%), Case 3 (resources, 100% vs 0%).

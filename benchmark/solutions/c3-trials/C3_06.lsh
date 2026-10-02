@@ -1,0 +1,61 @@
+needs read("data/check_1.txt")
+needs read("data/check_2.txt")
+needs read("data/check_3.txt")
+needs read("data/check_4.txt")
+needs read("data/check_5.txt")
+needs read("data/check_6.txt")
+needs read("data/check_7.txt")
+needs read("data/check_8.txt")
+needs read("data/check_9.txt")
+needs read("data/check_10.txt")
+let c1 = trim(read("data/check_1.txt"))
+if c1 == "pending" {
+  let c2 = trim(read("data/check_2.txt"))
+  if c2 == "pending" {
+    let c3 = trim(read("data/check_3.txt"))
+    if c3 == "pending" {
+      let c4 = trim(read("data/check_4.txt"))
+      if c4 == "pending" {
+        let c5 = trim(read("data/check_5.txt"))
+        if c5 == "pending" {
+          let c6 = trim(read("data/check_6.txt"))
+          if c6 == "pending" {
+            let c7 = trim(read("data/check_7.txt"))
+            if c7 == "pending" {
+              let c8 = trim(read("data/check_8.txt"))
+              if c8 == "pending" {
+                let c9 = trim(read("data/check_9.txt"))
+                if c9 == "pending" {
+                  let c10 = trim(read("data/check_10.txt"))
+                  if c10 == "pending" {
+                    print("gave up")
+                  } else {
+                    print(c10)
+                  }
+                } else {
+                  print(c9)
+                }
+              } else {
+                print(c8)
+              }
+            } else {
+              print(c7)
+            }
+          } else {
+            print(c6)
+          }
+        } else {
+          print(c5)
+        }
+      } else {
+        print(c4)
+      }
+    } else {
+      print(c3)
+    }
+  } else {
+    print(c2)
+  }
+} else {
+  print(c1)
+}

@@ -1,0 +1,18 @@
+needs read("data/check_1.txt")
+needs read("data/check_2.txt")
+needs read("data/check_3.txt")
+needs read("data/check_4.txt")
+needs read("data/check_5.txt")
+needs read("data/check_6.txt")
+needs read("data/check_7.txt")
+needs read("data/check_8.txt")
+needs read("data/check_9.txt")
+needs read("data/check_10.txt")
+for f in ["data/check_1.txt", "data/check_2.txt", "data/check_3.txt", "data/check_4.txt", "data/check_5.txt", "data/check_6.txt", "data/check_7.txt", "data/check_8.txt", "data/check_9.txt", "data/check_10.txt"] {
+  let result = trim(read(f))
+  if result != "pending" {
+    print(result)
+    verify result == "pending"
+  }
+}
+print("gave up after data/check_10.txt")
