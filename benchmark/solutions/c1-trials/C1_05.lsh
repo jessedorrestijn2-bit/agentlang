@@ -1,0 +1,3 @@
+needs read("../shared/validators.py")
+needs write("project/calc.py")
+write("project/calc.py", "def format_id(n):\n    return n\n")

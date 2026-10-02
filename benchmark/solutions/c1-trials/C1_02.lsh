@@ -1,0 +1,6 @@
+needs read("project/calc.py")
+needs read("../shared/validators.py")
+needs write("project/calc.py")
+let canonical = read("../shared/validators.py")
+verify canonical != ""
+write("project/calc.py", concat("def format_id(n):\n ", canonical))

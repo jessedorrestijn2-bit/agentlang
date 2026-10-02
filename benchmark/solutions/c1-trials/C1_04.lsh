@@ -1,0 +1,2 @@
+needs write("project/calc.py")
+write("project/calc.py", "from shared.validators import format_id as _format_id\n\n\ndef format_id(n):\n    return _format_id(n)\n")

@@ -1,0 +1,7 @@
+needs read("project/calc.py")
+needs read("../shared/validators.py")
+needs write("project/calc.py")
+let canonical = read("../shared/validators.py")
+let calc = read("project/calc.py")
+print(canonical)
+print(calc)
