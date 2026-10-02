@@ -80,7 +80,7 @@ fn main() {
     let path = match path {
         Some(p) => p,
         None => {
-            eprintln!("usage: agentlang <program.agl> [--log] [--allow action:target]...");
+            eprintln!("usage: leashterm <program.lsh> [--log] [--allow action:target]...");
             std::process::exit(2);
         }
     };
@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn write_then_read_roundtrip() {
-        let path = std::env::temp_dir().join("agentlang_test_roundtrip.txt");
+        let path = std::env::temp_dir().join("leashterm_test_roundtrip.txt");
         let p = path.to_string_lossy().replace('\\', "/");
         let src = format!(
             "needs write(\"{p}\")\nneeds read(\"{p}\")\nwrite(\"{p}\", \"hi\")\nprint(read(\"{p}\"))"
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn retry_gives_up_after_limit() {
-        let src = "needs read(\"agentlang_missing_file.txt\")\nretry 3 { let t = read(\"agentlang_missing_file.txt\") }";
+        let src = "needs read(\"leashterm_missing_file.txt\")\nretry 3 { let t = read(\"leashterm_missing_file.txt\") }";
         assert_eq!(error_kind(src), "retries_exhausted");
     }
 
@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn static_check_stops_the_program_before_anything_runs() {
-        let path = std::env::temp_dir().join("agentlang_static_check.txt");
+        let path = std::env::temp_dir().join("leashterm_static_check.txt");
         let p = path.to_string_lossy().replace('\\', "/");
         let src = format!(
             "needs write(\"{p}\")\nprint(\"started\")\nwrite(\"{p}\", \"x\")\nlet t = read(\"nope.txt\")"
@@ -236,8 +236,8 @@ mod tests {
 
     #[test]
     fn for_loop_can_write_several_files() {
-        let a = std::env::temp_dir().join("agentlang_loop_a.txt");
-        let b = std::env::temp_dir().join("agentlang_loop_b.txt");
+        let a = std::env::temp_dir().join("leashterm_loop_a.txt");
+        let b = std::env::temp_dir().join("leashterm_loop_b.txt");
         let pa = a.to_string_lossy().replace('\\', "/");
         let pb = b.to_string_lossy().replace('\\', "/");
         let src = format!(

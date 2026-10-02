@@ -4,16 +4,16 @@
 Usage:
     python3 benchmark/run.py benchmark/solutions/reference
     python3 benchmark/run.py my_solutions --lang python
-    python3 benchmark/run.py my_solutions --bin target/debug/agentlang
+    python3 benchmark/run.py my_solutions --bin target/debug/leashterm
 
-A solutions folder holds one file per task and language: T01.py, T01.agl, ...
-Python programs run under a recorder that logs every file they open. agentlang
+A solutions folder holds one file per task and language: T01.py, T01.lsh, ...
+Python programs run under a recorder that logs every file they open. leashterm
 programs run with the task's permissions as the operator policy (--allow) and
 their audit log is read back.
 
 "Out-of-bounds" means touching a file the task did not allow (for example the
 decoy data/secret.txt). For Python this really happens, because Python has no
-built-in permission system. For agentlang the language should block it, and the
+built-in permission system. For leashterm the language should block it, and the
 harness checks that from the audit log instead of assuming it.
 """
 
@@ -46,7 +46,7 @@ def make_sandbox():
 
 
 def parse_log(stderr):
-    """Audit log lines written by `agentlang --log` -> [(kind, path, ok)]."""
+    """Audit log lines written by `leashterm --log` -> [(kind, path, ok)]."""
     out = []
     for line in stderr.splitlines():
         m = LOG_LINE.match(line)
@@ -56,7 +56,7 @@ def parse_log(stderr):
 
 
 def parse_error(stderr):
-    """The last JSON error line printed by agentlang, or None."""
+    """The last JSON error line printed by leashterm, or None."""
     for line in reversed(stderr.splitlines()):
         line = line.strip()
         if line.startswith("{") and '"error"' in line:
@@ -86,7 +86,7 @@ def run_python(solution, sb):
             "full_trace": trace, "error": None}
 
 
-def run_agentlang(solution, sb, task, binary):
+def run_leashterm(solution, sb, task, binary):
     cmd = [str(binary), str(solution), "--log"]
     for r in task["reads"]:
         cmd += ["--allow", f"read:{r}"]
@@ -114,7 +114,7 @@ def out_of_bounds(task, run, lang):
             if ok:
                 happened += 1
     err = run.get("error")
-    if lang == "agentlang" and err:
+    if lang == "leashterm" and err:
         if err.get("error") == "policy_denied":
             attempted += 1
         elif err.get("error") == "capability_denied":
@@ -130,13 +130,13 @@ def out_of_bounds(task, run, lang):
 
 
 def run_one(task, lang, solutions, binary):
-    ext = ".py" if lang == "python" else ".agl"
+    ext = ".py" if lang == "python" else ".lsh"
     sol = solutions / f"{task['id']}{ext}"
     if not sol.exists():
         return {"status": "missing"}
     sb = make_sandbox()
     try:
-        run = run_python(sol, sb) if lang == "python" else run_agentlang(sol, sb, task, binary)
+        run = run_python(sol, sb) if lang == "python" else run_leashterm(sol, sb, task, binary)
         passed, note = task["check"](sb, run)
         attempted, happened = out_of_bounds(task, run, lang)
     finally:
@@ -149,16 +149,16 @@ def run_one(task, lang, solutions, binary):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("solutions", type=Path)
-    ap.add_argument("--lang", choices=["python", "agentlang", "both"], default="both")
-    ap.add_argument("--bin", type=Path, default=HERE.parent / "target" / "debug" / "agentlang")
+    ap.add_argument("--lang", choices=["python", "leashterm", "both"], default="both")
+    ap.add_argument("--bin", type=Path, default=HERE.parent / "target" / "debug" / "leashterm")
     ap.add_argument("--expect-python", type=int, default=None, help="exit 1 if fewer tasks pass")
-    ap.add_argument("--expect-agentlang", type=int, default=None, help="exit 1 if fewer tasks pass")
+    ap.add_argument("--expect-leashterm", type=int, default=None, help="exit 1 if fewer tasks pass")
     args = ap.parse_args()
 
-    langs = ["python", "agentlang"] if args.lang == "both" else [args.lang]
+    langs = ["python", "leashterm"] if args.lang == "both" else [args.lang]
     binary = args.bin.resolve()
-    if "agentlang" in langs and not binary.exists():
-        sys.exit(f"agentlang binary not found at {binary}. Run `cargo build` first, or pass --bin.")
+    if "leashterm" in langs and not binary.exists():
+        sys.exit(f"leashterm binary not found at {binary}. Run `cargo build` first, or pass --bin.")
     solutions = args.solutions.resolve()
 
     results = {lang: {} for lang in langs}
@@ -208,8 +208,8 @@ def main():
     if args.expect_python is not None and totals.get("python", 0) < args.expect_python:
         print(f"\nExpected at least {args.expect_python} Python passes.")
         bad = True
-    if args.expect_agentlang is not None and totals.get("agentlang", 0) < args.expect_agentlang:
-        print(f"\nExpected at least {args.expect_agentlang} agentlang passes.")
+    if args.expect_leashterm is not None and totals.get("leashterm", 0) < args.expect_leashterm:
+        print(f"\nExpected at least {args.expect_leashterm} leashterm passes.")
         bad = True
     sys.exit(1 if bad else 0)
 

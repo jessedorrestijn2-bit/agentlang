@@ -1,4 +1,4 @@
-agentlang is a small language for AI agents. A program is a list of statements.
+leashterm is a small language for AI agents. A program is a list of statements.
 Whitespace and newlines do not matter. `#` starts a comment.
 
 PERMISSIONS (required, must be at the very top, before any other statement):

@@ -9,9 +9,9 @@ Usage:
     python3 benchmark/repeat.py benchmark/solutions/t22-trials --task T22
 
 Put each independent trial in the solutions folder as <TASK>_<label>.py and/or
-<TASK>_<label>.agl, for example:
-    T22_01.py  T22_01.agl
-    T22_02.py  T22_02.agl
+<TASK>_<label>.lsh, for example:
+    T22_01.py  T22_01.lsh
+    T22_02.py  T22_02.lsh
     ...
 Each file is one separate answer from a fresh conversation. A trial can exist in
 one language only; languages are counted and reported separately.
@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from run import HERE, make_sandbox, out_of_bounds, run_agentlang, run_python  # noqa: E402
+from run import HERE, make_sandbox, out_of_bounds, run_leashterm, run_python  # noqa: E402
 from tasks import TASKS  # noqa: E402
 
 import shutil
@@ -38,7 +38,7 @@ def find_task(task_id):
 def run_trial(task, lang, path, binary):
     sb = make_sandbox()
     try:
-        run = run_python(sb=sb, solution=path) if lang == "python" else run_agentlang(path, sb, task, binary)
+        run = run_python(sb=sb, solution=path) if lang == "python" else run_leashterm(path, sb, task, binary)
         passed, note = task["check"](sb, run)
         attempted, happened = out_of_bounds(task, run, lang)
     finally:
@@ -50,23 +50,23 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("solutions", type=Path)
     ap.add_argument("--task", required=True)
-    ap.add_argument("--lang", choices=["python", "agentlang", "both"], default="both")
-    ap.add_argument("--bin", type=Path, default=HERE.parent / "target" / "debug" / "agentlang")
+    ap.add_argument("--lang", choices=["python", "leashterm", "both"], default="both")
+    ap.add_argument("--bin", type=Path, default=HERE.parent / "target" / "debug" / "leashterm")
     args = ap.parse_args()
 
     task = find_task(args.task)
-    langs = ["python", "agentlang"] if args.lang == "both" else [args.lang]
+    langs = ["python", "leashterm"] if args.lang == "both" else [args.lang]
     binary = args.bin.resolve()
     solutions = args.solutions.resolve()
 
     for lang in langs:
-        ext = ".py" if lang == "python" else ".agl"
+        ext = ".py" if lang == "python" else ".lsh"
         files = sorted(solutions.glob(f"{task['id']}_*{ext}"))
         if not files:
             print(f"\n{lang}: no files matching {task['id']}_*{ext} in {solutions}")
             continue
-        if lang == "agentlang" and not binary.exists():
-            sys.exit(f"agentlang binary not found at {binary}. Run `cargo build` first, or pass --bin.")
+        if lang == "leashterm" and not binary.exists():
+            sys.exit(f"leashterm binary not found at {binary}. Run `cargo build` first, or pass --bin.")
 
         print(f"\n{lang} ({len(files)} trials)")
         print(f"{'trial':<20} {'attempted':<10} {'happened':<10} {'task ok':<8} note")

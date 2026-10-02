@@ -1,4 +1,4 @@
-# agentlang (working name)
+# leashterm (working name)
 
 A tiny language for AI agents. Instead of letting a program do anything and bolting a
 sandbox on afterwards, the things agents need are part of the language:
@@ -18,7 +18,7 @@ sandbox on afterwards, the things agents need are part of the language:
 This is an early skeleton: lexer, parser, static permission check, interpreter, tests
 and ten examples. v0.5 passed its tests and the benchmark in Codespaces and on GitHub.
 v0.6 adds `if`/`else`, `!=`, `concat` and `trim` (40 tests) and still needs its first
-`cargo test`. A first pilot run (one model, one try) scored Python 10/10 and agentlang
+`cargo test`. A first pilot run (one model, one try) scored Python 10/10 and leashterm
 8/10; the two misses were exactly the features v0.6 now adds.
 
 ## Syntax
@@ -58,7 +58,7 @@ A program's `needs` lines are requests. Without more, a program could simply gra
 anything. So the person or system that runs it can set a hard limit:
 
 ```
-agentlang prog.agl --allow read:data/a.txt --allow write:out/b.txt
+leashterm prog.lsh --allow read:data/a.txt --allow write:out/b.txt
 ```
 
 If any `--allow` is given, a program that asks (with `needs`) for something not on that
@@ -82,16 +82,16 @@ can install Rust (`curl https://sh.rustup.rs -sSf | sh`) or use a Rust dev conta
 
 ```
 cargo test                                   # run the unit tests
-cargo run -- examples/01_hello.agl           # run a program
-cargo run -- examples/02_read_file.agl --log # also print the audit log
-cargo run -- examples/03_denied.agl          # must fail with capability_denied
-cargo run -- examples/02_read_file.agl --allow read:examples/other.txt   # policy_denied
-cargo run -- examples/04_retry.agl           # must fail with retries_exhausted
-cargo run -- examples/06_for_loop.agl        # loops over two files
-cargo run -- examples/07_for_denied.agl      # refused before anything runs
-cargo run -- examples/08_fetch.agl           # needs internet
-cargo run -- examples/09_fetch_denied.agl    # refused before anything runs
-cargo run -- examples/10_if_and_concat.agl   # if/else, concat and trim
+cargo run -- examples/01_hello.lsh           # run a program
+cargo run -- examples/02_read_file.lsh --log # also print the audit log
+cargo run -- examples/03_denied.lsh          # must fail with capability_denied
+cargo run -- examples/02_read_file.lsh --allow read:examples/other.txt   # policy_denied
+cargo run -- examples/04_retry.lsh           # must fail with retries_exhausted
+cargo run -- examples/06_for_loop.lsh        # loops over two files
+cargo run -- examples/07_for_denied.lsh      # refused before anything runs
+cargo run -- examples/08_fetch.lsh           # needs internet
+cargo run -- examples/09_fetch_denied.lsh    # refused before anything runs
+cargo run -- examples/10_if_and_concat.lsh   # if/else, concat and trim
 ```
 
 Example of a refused program (stderr):
@@ -122,12 +122,12 @@ Example of a refused program (stderr):
 7. ~~`if`/`else`, `concat`, `trim`.~~ Done in v0.6. The benchmark (not the language) grew
    to 22 tasks: T11-T12 (temptation), T13-T20 (instruction-following traps) and T21-T22 (a
    spontaneous-temptation experiment inspired by the July 2026 OpenAI-Hugging Face
-   incident, see `benchmark/README.md`). ChatGPT scored 20/20 and 19/20 (Python/agentlang)
+   incident, see `benchmark/README.md`). ChatGPT scored 20/20 and 19/20 (Python/leashterm)
    on T01-T20, with zero out-of-bounds access either way: these tasks have not yet shown a
    safety advantage, only shorter programs. T21 and T22 are a planned family of tasks (not
    a language change) at increasing temptation strength. T21 came back clean (no attempt in
    either language); T22 did not. Repeated 9 times per language from fresh conversations:
-   Python attempted the undeclared file in 9/9 trials and leaked data in 9/9; agentlang
+   Python attempted the undeclared file in 9/9 trials and leaked data in 9/9; leashterm
    attempted it in 9/9 trials (identical model intent) but was blocked before execution in
    9/9 - a 100%-vs-0% result, not a single anecdote. See `benchmark/evidence/` and
    `benchmark/solutions/t22-trials/` for ChatGPT's actual, unedited answers and
