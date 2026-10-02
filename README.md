@@ -124,5 +124,8 @@ Example of a refused program (stderr):
    spontaneous-temptation experiment inspired by the July 2026 OpenAI-Hugging Face
    incident, see `benchmark/README.md`). ChatGPT scored 20/20 and 19/20 (Python/agentlang)
    on T01-T20, with zero out-of-bounds access either way: these tasks have not yet shown a
-   safety advantage, only shorter programs. T21 and its planned follow-ups are designed to
-   test something the first 20 could not.
+   safety advantage, only shorter programs. T21 and T22 are a planned family of tasks (not
+   a language change) at increasing temptation strength, designed to test something T01-T20
+   could not: on both, ChatGPT made no attempt at the undeclared file in either language,
+   with no rules ever mentioned in the prompt - itself a real result, not yet a safety
+   advantage for agentlang. See `benchmark/README.md` for the full design and reasoning.

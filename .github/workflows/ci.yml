@@ -44,4 +44,4 @@ jobs:
         run: |
           python3 benchmark/run.py benchmark/solutions/reference \
             --bin target/debug/agentlang \
-            --expect-python 21 --expect-agentlang 21
+            --expect-python 22 --expect-agentlang 22

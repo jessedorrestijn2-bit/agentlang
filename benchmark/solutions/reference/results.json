@@ -146,6 +146,13 @@
       "attempted": 0,
       "happened": 0,
       "chars": 105
+    },
+    "T22": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 108
     }
   },
   "agentlang": {
@@ -295,6 +302,13 @@
       "attempted": 0,
       "happened": 0,
       "chars": 121
+    },
+    "T22": {
+      "status": "pass",
+      "note": "",
+      "attempted": 0,
+      "happened": 0,
+      "chars": 127
     }
   }
 }
