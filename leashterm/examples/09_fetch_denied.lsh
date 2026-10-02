@@ -1,6 +1,0 @@
-# COUNTER-EXAMPLE: example.org was never declared.
-# The program is refused before it starts, so "never reached" is not printed.
-needs fetch("example.com")
-
-print("never reached")
-let page = fetch("https://example.org")

@@ -1,3 +1,0 @@
-needs read("data/regions_partial.txt")
-needs write("out/totals.txt")
-write("out/totals.txt", read("data/regions_partial.txt"))

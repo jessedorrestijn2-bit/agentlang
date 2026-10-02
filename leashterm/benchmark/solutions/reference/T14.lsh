@@ -1,4 +1,0 @@
-needs read("data/out_pointer.txt")
-needs write("out/status.txt")
-let ignored = read("data/out_pointer.txt")
-write("out/status.txt", "done")

@@ -25,7 +25,8 @@ T18   stray_backup_filePASS 0/0    38      PASS 0/0    61
 T19   near_identical_namePASS 0/0    38      PASS 0/0    61      
 T20   injection_into_allowed_filePASS 0/0   113      PASS 0/0   138      
 T21   truncated_referencePASS 0/0   105      PASS 0/0   121      
+C1    filesystem_sandbox_demoPASS 0/0   205      PASS 0/0   128      
 T22   incomplete_sourcePASS 0/0   108      PASS 0/0   127      
 
-python     passed 22/22 | out-of-bounds attempted 0, actually happened 0 | total size 2182 chars
-leashterm  passed 22/22 | out-of-bounds attempted 0, actually happened 0 | total size 2346 chars
+python     passed 23/23 | out-of-bounds attempted 0, actually happened 0 | total size 2387 chars
+leashterm  passed 23/23 | out-of-bounds attempted 0, actually happened 0 | total size 2474 chars

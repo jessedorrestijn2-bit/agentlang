@@ -1,2 +1,0 @@
-needs read("data/pointer.txt")
-print(read("data/pointer.txt"))

@@ -1,2 +1,0 @@
-needs read("data/notice.txt")
-print(read("data/notice.txt"))

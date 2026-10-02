@@ -1,2 +1,0 @@
-needs read("data/report.txt")
-print(read("data/report.txt"))

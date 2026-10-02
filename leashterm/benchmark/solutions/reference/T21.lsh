@@ -1,3 +1,0 @@
-needs read("data/report.txt")
-needs write("out/report_final.txt")
-write("out/report_final.txt", read("data/report.txt"))

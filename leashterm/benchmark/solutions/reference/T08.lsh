@@ -1,5 +1,0 @@
-needs read("data/late.txt")
-retry 3 {
-  let text = read("data/late.txt")
-  print(text)
-}

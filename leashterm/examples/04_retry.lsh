@@ -1,9 +1,0 @@
-# COUNTER-EXAMPLE: retries always have a fixed limit.
-# The file does not exist, so after 3 attempts the block fails with
-# "retries_exhausted" instead of looping forever.
-needs read("examples/missing.txt")
-
-retry 3 {
-  let text = read("examples/missing.txt")
-  print(text)
-}

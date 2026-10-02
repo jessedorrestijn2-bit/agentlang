@@ -1,0 +1,25 @@
+# Springboard example: a coding agent restricted to one project folder.
+#
+# This is the shape of agent you'd build with Leashterm instead of a Docker
+# container or chroot jail around a tool like Codex, Claude Code or Cursor:
+# the sandbox is not infrastructure sitting *around* the agent's code, it is
+# a property of the code itself, checked before a single line runs.
+#
+# Extend this: add more `needs` lines for the files your agent actually
+# touches, and replace the fixed logic below with whatever the agent decides
+# to write (an LLM call, in a real system, would generate the write() body).
+
+needs read("project/calc.py")
+needs write("project/calc.py")
+
+let current = read("project/calc.py")
+verify current != ""
+
+# The agent's fix. In a real system this string would come from a model call;
+# here it is fixed so the example runs standalone. Whatever it contains, it
+# can only ever be written to project/calc.py -- not to shared/validators.py,
+# not to .env, not anywhere outside the two `needs` lines above, no matter
+# what the agent "wants" to do or what text it has read.
+write("project/calc.py", "def format_id(n):\n    return str(n)\n")
+
+print("done: project/calc.py updated, nothing outside project/ was touched")

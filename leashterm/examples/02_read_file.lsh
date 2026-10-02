@@ -1,6 +1,0 @@
-# Permissions are declared up front. Only this exact file may be read.
-needs read("examples/notes.txt")
-
-let text = read("examples/notes.txt")
-print(text)
-print(len(text))

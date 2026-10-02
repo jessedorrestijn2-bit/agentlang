@@ -1,1 +1,0 @@
-Remember: agents should ask a human before sending email.

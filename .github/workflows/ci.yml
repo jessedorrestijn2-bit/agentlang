@@ -44,4 +44,8 @@ jobs:
         run: |
           python3 benchmark/run.py benchmark/solutions/reference \
             --bin target/debug/leashterm \
-            --expect-python 22 --expect-leashterm 22
+            --expect-python 23 --expect-leashterm 23
+
+      - name: Case study springboard examples
+        run: |
+          cd cases/case1-filesystem && ../../target/debug/leashterm springboard.lsh

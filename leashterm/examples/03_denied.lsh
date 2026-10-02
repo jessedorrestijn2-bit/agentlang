@@ -1,5 +1,0 @@
-# COUNTER-EXAMPLE: this program must be refused.
-# It reads a file without declaring the permission, so the language stops it
-# and returns a structured error that a model can use to repair the program.
-let secret = read("examples/secret.txt")
-print(secret)

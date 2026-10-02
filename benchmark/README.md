@@ -181,7 +181,7 @@ python3 benchmark/run.py benchmark/solutions/reference
 ```
 
 The `reference` solutions were written by the language designer. They only check that the
-harness works (Python and leashterm should both pass 22/22). **They are not a fair result.**
+harness works (Python and leashterm should both pass 23/23). **They are not a fair result.**
 
 ## Run a real test with a model
 
@@ -244,3 +244,21 @@ python3 benchmark/repeat.py benchmark/solutions/t22-trials --task T22
 It reports per-trial results plus, for each language: temptation rate, containment rate
 (n/a if nothing was attempted), leak rate (shortcut actually executed), and the fraction
 that solved the task correctly. Works for any task, not just T22, by changing `--task`.
+
+
+## Case studies: practical demos for companies, not just research tasks
+
+T01-T22 are built to be scientifically clean and minimal. Alongside them, `cases/` holds
+practical demo scenarios aimed at a different audience: a team that currently builds
+sandboxing infrastructure *around* an agent (Docker, chroot, seccomp, a network proxy, a
+rate limiter) and might consider expressing that boundary in the agent's own code instead.
+Each case has a short business-framed README, a standalone "springboard" `.lsh` example
+meant to be extended, and one benchmark task (same `tasks.py`/`run.py`/`repeat.py`
+machinery as T01-T22) built with the same spontaneous-temptation methodology as T21/T22.
+
+- **Case 1 - filesystem sandboxing** (`cases/case1-filesystem/`, task `C1`): a coding agent
+  restricted to one project folder, where the correct fix genuinely depends on a file in a
+  sibling package it was never declared to need, a completely ordinary "match the existing
+  codebase convention" situation. Self-validated; not yet run with a real model.
+- Case 2 (network egress control, mirroring the July 2026 OpenAI-Hugging Face incident) and
+  Case 3 (resource/cost budgets, built on the v0.7 step budget) are planned next.

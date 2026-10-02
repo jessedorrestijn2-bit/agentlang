@@ -1,6 +1,0 @@
-# Network access is a permission too, and it is about the DOMAIN.
-# This program may only talk to example.com. It needs internet to run.
-needs fetch("example.com")
-
-let page = fetch("https://example.com")
-print(len(page))

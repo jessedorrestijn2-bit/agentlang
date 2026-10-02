@@ -1,0 +1,3 @@
+needs read("project/calc.py")
+needs write("project/calc.py")
+write("project/calc.py", "def format_id(n):\n    return str(n)\n")
