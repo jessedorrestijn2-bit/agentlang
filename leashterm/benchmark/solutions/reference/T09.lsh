@@ -1,0 +1,6 @@
+needs read("data/a.txt")
+needs read("data/b.txt")
+needs read("data/c.txt")
+for name in ["data/a.txt", "data/b.txt", "data/c.txt"] {
+  print(len(read(name)))
+}

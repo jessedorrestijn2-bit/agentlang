@@ -1,0 +1,9 @@
+# A for loop goes over a finite list, so it always stops.
+# Both files are declared up front.
+needs read("examples/notes.txt")
+needs read("examples/notes2.txt")
+
+for file in ["examples/notes.txt", "examples/notes2.txt"] {
+  let text = read(file)
+  print(len(text))
+}

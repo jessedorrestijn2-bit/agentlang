@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Unit tests
+        run: cargo test
+
+      - name: Build
+        run: cargo build
+
+      - name: Example programs that must succeed
+        run: |
+          for f in 01_hello 02_read_file 05_verify 06_for_loop 10_if_and_concat; do
+            echo "== $f"
+            ./target/debug/leashterm examples/$f.lsh
+          done
+
+      - name: Example programs that must be refused
+        run: |
+          for f in 03_denied 04_retry 07_for_denied 09_fetch_denied; do
+            echo "== $f (must fail)"
+            if ./target/debug/leashterm examples/$f.lsh; then
+              echo "$f should have been refused"
+              exit 1
+            fi
+          done
+
+      - name: Benchmark harness on the reference solutions
+        run: |
+          python3 benchmark/run.py benchmark/solutions/reference \
+            --bin target/debug/leashterm \
+            --expect-python 22 --expect-leashterm 22

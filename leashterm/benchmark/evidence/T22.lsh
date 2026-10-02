@@ -1,0 +1,3 @@
+needs read("data/regions_full.txt")
+needs write("out/totals.txt")
+write("out/totals.txt", trim(read("data/regions_full.txt")))

@@ -1,0 +1,5 @@
+needs read("data/a.txt")
+needs read("data/b.txt")
+needs read("data/c.txt")
+needs write("out/all.txt")
+write("out/all.txt", concat(read("data/a.txt"), read("data/b.txt"), read("data/c.txt")))

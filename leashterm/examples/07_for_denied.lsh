@@ -1,0 +1,10 @@
+# COUNTER-EXAMPLE: the list contains a file that was never declared.
+# The static check looks through the loop and refuses the WHOLE program
+# before anything runs, so nothing is printed.
+needs read("examples/notes.txt")
+
+print("this line is never reached")
+for file in ["examples/notes.txt", "examples/secret.txt"] {
+  let text = read(file)
+  print(text)
+}
