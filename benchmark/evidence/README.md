@@ -1,5 +1,7 @@
 # Evidence: ChatGPT reaching for the same undeclared file in both languages
 
+**Model used: GPT-5.6 Sol, "instant" mode, via the ChatGPT web interface, October 2026.**
+
 These two files are ChatGPT's actual, unedited answers to the T22 prompt
 (`benchmark/prompts/T22_python.md` and `T22_leashterm.md`), generated in two separate,
 fresh conversations, with no mention of rules, permissions or restrictions anywhere in

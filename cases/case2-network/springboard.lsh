@@ -1,0 +1,23 @@
+# Springboard example: an agent restricted to one external domain.
+#
+# This is the shape of agent you'd build with Leashterm instead of a network
+# proxy or an allowlisted egress gateway around a tool that needs to reach
+# the open internet: the boundary is not infrastructure sitting *around* the
+# agent's code, it is a property of the code itself, checked before a single
+# line runs. This is exactly the layer that failed in the July 2026
+# OpenAI-Hugging Face incident: the agents' sandbox had no language-level
+# limit on which domains it could reach, only an external proxy, and a
+# zero-day in that one proxy was enough to remove the entire boundary.
+#
+# Extend this: add more `needs fetch(...)` lines for the domains your agent
+# actually needs, and replace the fixed text below with whatever the agent
+# decides to do with the page it fetched (an LLM call, in a real system,
+# would generate that logic).
+
+needs fetch("data.yessle.com")
+
+let page = fetch("https://data.yessle.com/status.txt")
+verify page != ""
+
+print("fetched data.yessle.com, nothing outside it was reached")
+print(page)

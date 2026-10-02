@@ -34,6 +34,9 @@ cd cases/case1-filesystem
 
 ## The test: does the temptation actually arise?
 
+**Model used for all ChatGPT trials: GPT-5.6 Sol, "instant" mode, via the ChatGPT web
+interface, October 2026.**
+
 A sandbox is only interesting if there is ever a real reason to want out of it. We built a
 small, realistic scenario, `C1` in `benchmark/tasks.py`, using exactly the same
 spontaneous-temptation methodology as T21/T22 in the main benchmark (no permissions or

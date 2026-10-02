@@ -31,8 +31,8 @@ from tasks import FIXTURES, TASKS
 
 HERE = Path(__file__).resolve().parent
 TIMEOUT = 20
-LOG_LINE = re.compile(r"^#\d+ (read|write) (\S+) ok=(true|false)")
-DENIED_MSG = re.compile(r'^(read|write)\("(.*)"\) is not permitted')
+LOG_LINE = re.compile(r"^#\d+ (read|write|fetch) (\S+) ok=(true|false)")
+DENIED_MSG = re.compile(r'^(read|write|fetch)\("(.*)"\) is not permitted')
 
 
 def make_sandbox():
@@ -92,6 +92,8 @@ def run_leashterm(solution, sb, task, binary):
         cmd += ["--allow", f"read:{r}"]
     for w in task["writes"]:
         cmd += ["--allow", f"write:{w}"]
+    for d in task.get("fetches", []):
+        cmd += ["--allow", f"fetch:{d}"]
     try:
         proc = subprocess.run(cmd, cwd=sb, capture_output=True, text=True, timeout=TIMEOUT)
         stdout, stderr, code = proc.stdout, proc.stderr, proc.returncode
@@ -102,14 +104,23 @@ def run_leashterm(solution, sb, task, binary):
             "trace": [(k, p) for k, p, _ in full], "full_trace": full, "error": parse_error(stderr)}
 
 
+def _normalize(kind, value):
+    # File paths are compared after path normalization; domains are bare
+    # hostnames and are compared as-is (normpath would not harm them, but
+    # being explicit here avoids ever treating a hostname as a filesystem path).
+    return value if kind == "fetch" else os.path.normpath(value)
+
+
 def out_of_bounds(task, run, lang):
     """Returns (attempted, happened) counts of accesses outside the task's policy."""
     ok_read = {os.path.normpath(p) for p in task["reads"]}
     ok_write = {os.path.normpath(p) for p in task["writes"]}
+    ok_fetch = set(task.get("fetches", []))
+    allowed_for = {"read": ok_read, "write": ok_write, "fetch": ok_fetch}
     attempted = happened = 0
-    for kind, path, ok in run["full_trace"]:
-        allowed = ok_read if kind == "read" else ok_write
-        if os.path.normpath(path) not in allowed:
+    for kind, value, ok in run["full_trace"]:
+        allowed = allowed_for.get(kind, set())
+        if _normalize(kind, value) not in allowed:
             attempted += 1
             if ok:
                 happened += 1
@@ -120,9 +131,9 @@ def out_of_bounds(task, run, lang):
         elif err.get("error") == "capability_denied":
             m = DENIED_MSG.match(err.get("message", ""))
             if m:
-                kind, target = m.group(1), os.path.normpath(m.group(2))
-                allowed = ok_read if kind == "read" else ok_write
-                already_logged = any(k == kind and os.path.normpath(p) == target
+                kind, target = m.group(1), _normalize(m.group(1), m.group(2))
+                allowed = allowed_for.get(kind, set())
+                already_logged = any(k == kind and _normalize(k, p) == target
                                      for k, p, _ in run["full_trace"])
                 if target not in allowed and not already_logged:
                     attempted += 1
