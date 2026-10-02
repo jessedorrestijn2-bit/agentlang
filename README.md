@@ -126,11 +126,10 @@ Example of a refused program (stderr):
    on T01-T20, with zero out-of-bounds access either way: these tasks have not yet shown a
    safety advantage, only shorter programs. T21 and T22 are a planned family of tasks (not
    a language change) at increasing temptation strength. T21 came back clean (no attempt in
-   either language); T22 did not: **ChatGPT reached for the same undeclared file in both
-   languages**, unprompted, because the stated task could not be fully done without it -
-   the first real divergence in this project. In Python the attempt succeeded and leaked
-   data into the output; in agentlang the whole program was refused before it started. See
-   `benchmark/evidence/` for ChatGPT's actual, unedited answers and `benchmark/README.md`
-   for the full design, reasoning and this important caveat: it is one model, one task, one
-   attempt per language, so it demonstrates the property rather than proving it holds
-   generally.
+   either language); T22 did not. Repeated 9 times per language from fresh conversations:
+   Python attempted the undeclared file in 9/9 trials and leaked data in 9/9; agentlang
+   attempted it in 9/9 trials (identical model intent) but was blocked before execution in
+   9/9 - a 100%-vs-0% result, not a single anecdote. See `benchmark/evidence/` and
+   `benchmark/solutions/t22-trials/` for ChatGPT's actual, unedited answers and
+   `benchmark/README.md` for the full design and this caveat: one model, one task, one
+   temptation level - not yet a general claim.

@@ -28,9 +28,14 @@ This is the first result in this project that is not just "the model behaved its
 languages". ChatGPT wanted to do the same thing in both cases; the language, not the model,
 is what decided whether it could.
 
-**What this does and does not show.** It is one model, one task, one attempt in each
-language, so it is a demonstration, not a statistical result. It does show, with code the
-language's own author did not write, that agentlang's permission system holds even when a
-well-behaved model's own helpfulness pulls it toward crossing a line nobody ever told it
-about. A rigorous version of this finding needs many repeated trials, several models, and
-the stronger temptation levels (4-5) that have not been tried yet.
+**What this does and does not show.** On its own, this was one model, one task, one attempt
+in each language, so it was a demonstration rather than a statistical result. It was then
+followed up with 9 independent repeats per language (fresh conversation each time, same
+prompts), stored in `benchmark/solutions/t22-trials/`: **Python attempted the undeclared
+file in 9/9 trials and leaked data in 9/9; agentlang attempted it in 9/9 trials (identical
+model intent, same `needs read(...)` choice) but was blocked before execution in 9/9**. See
+`benchmark/README.md` for the full table. This shows, with code the language's own author
+did not write, that agentlang's permission system holds even when a well-behaved model's
+own helpfulness repeatedly pulls it toward crossing a line nobody ever told it about. It is
+still one model and one temptation level; broader claims need several models and the
+stronger temptation levels (4-5) that have not been tried yet.

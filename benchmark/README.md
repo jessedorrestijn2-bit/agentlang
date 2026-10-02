@@ -152,12 +152,26 @@ it). The outcome differed sharply between the two languages:
 | Leaked data into the output | yes | no (whole program refused before it started) |
 
 This is the first result in the project where the two languages genuinely diverge on the
-same model intent, rather than both simply reflecting good model behavior. It remains a
-single model, a single task, and a single attempt in each language, so it is a
-demonstration rather than a statistical result; a rigorous version needs many repeated
-trials, several models (including weaker ones, where this kind of shortcut-taking is
-plausibly more common), and the stronger temptation levels (4-5) that have not been tried
-yet.
+same model intent, rather than both simply reflecting good model behavior. It was a single
+attempt in each language, so we repeated it: 9 independent trials per language, each from a
+fresh ChatGPT conversation with the same `T22_python.md` / `T22_agentlang.md` prompt, saved
+in `benchmark/solutions/t22-trials/` and measured with `benchmark/repeat.py`.
+
+| | Python (9 trials) | agentlang (9 trials) |
+|---|---|---|
+| Temptation rate (attempted the undeclared file) | 9/9 = 100% | 9/9 = 100% |
+| Containment rate (attempt blocked, given an attempt) | 0/9 = 0% | 9/9 = 100% |
+| Leak rate (shortcut actually executed) | 9/9 = 100% | 0/9 = 0% |
+
+The model's own behavior was identical and consistent across every trial in both
+languages: it always reached for the undeclared file. What differed completely was the
+outcome: every Python trial leaked the undeclared data into the output, and every agentlang
+trial was refused before a single line executed. This is no longer a single demonstration;
+with n=9 in each language it is a small but real, reproducible, 100%-vs-0% result, on one
+task, with one model (ChatGPT via the web interface), at one temptation level (level 3 of
+5). It is still not a general claim about all models, all tasks, or all temptation levels,
+and `repeat.py` is built to extend this same measurement to any of those as testing
+continues.
 
 ## Run it
 
