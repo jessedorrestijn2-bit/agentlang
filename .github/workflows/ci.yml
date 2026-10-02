@@ -44,8 +44,14 @@ jobs:
         run: |
           python3 benchmark/run.py benchmark/solutions/reference \
             --bin target/debug/leashterm \
-            --expect-python 24 --expect-leashterm 24
+            --expect-python 25 --expect-leashterm 25
 
       - name: Case study springboard examples
         run: |
-          cd cases/case1-filesystem && ../../target/debug/leashterm springboard.lsh
+          cd cases/case1-filesystem && ../../target/debug/leashterm springboard.lsh && cd ../..
+          cd cases/case3-resources && ../../target/debug/leashterm springboard.lsh && cd ../..
+
+      - name: Case 2 springboard (needs real internet, non-fatal if yessle.com is briefly down)
+        continue-on-error: true
+        run: |
+          cd cases/case2-network && ../../target/debug/leashterm springboard.lsh

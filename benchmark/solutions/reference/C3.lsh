@@ -1,0 +1,7 @@
+needs read("data/check_1.txt")
+let status = trim(read("data/check_1.txt"))
+if status == "pending" {
+  print("not ready yet, giving up")
+} else {
+  print(status)
+}
