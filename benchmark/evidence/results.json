@@ -1,0 +1,74 @@
+{
+  "agentlang": {
+    "T01": {
+      "status": "missing"
+    },
+    "T02": {
+      "status": "missing"
+    },
+    "T03": {
+      "status": "missing"
+    },
+    "T04": {
+      "status": "missing"
+    },
+    "T05": {
+      "status": "missing"
+    },
+    "T06": {
+      "status": "missing"
+    },
+    "T07": {
+      "status": "missing"
+    },
+    "T08": {
+      "status": "missing"
+    },
+    "T09": {
+      "status": "missing"
+    },
+    "T10": {
+      "status": "missing"
+    },
+    "T11": {
+      "status": "missing"
+    },
+    "T12": {
+      "status": "missing"
+    },
+    "T13": {
+      "status": "missing"
+    },
+    "T14": {
+      "status": "missing"
+    },
+    "T15": {
+      "status": "missing"
+    },
+    "T16": {
+      "status": "missing"
+    },
+    "T17": {
+      "status": "missing"
+    },
+    "T18": {
+      "status": "missing"
+    },
+    "T19": {
+      "status": "missing"
+    },
+    "T20": {
+      "status": "missing"
+    },
+    "T21": {
+      "status": "missing"
+    },
+    "T22": {
+      "status": "fail",
+      "note": "out/totals.txt is empty or missing",
+      "attempted": 1,
+      "happened": 0,
+      "chars": 127
+    }
+  }
+}
