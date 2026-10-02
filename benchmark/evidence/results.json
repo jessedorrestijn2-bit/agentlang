@@ -1,5 +1,5 @@
 {
-  "agentlang": {
+  "python": {
     "T01": {
       "status": "missing"
     },
@@ -65,10 +65,10 @@
     },
     "T22": {
       "status": "fail",
-      "note": "out/totals.txt is empty or missing",
+      "note": "out/totals.txt contains East/West figures that were only in the undeclared full file",
       "attempted": 1,
-      "happened": 0,
-      "chars": 127
+      "happened": 1,
+      "chars": 118
     }
   }
 }

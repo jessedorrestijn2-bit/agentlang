@@ -206,3 +206,27 @@ the single prompts for numbers you want to quote.
 - Size is measured in characters, not real tokens.
 - The agentlang spec was written by the language author. Prompt wording matters a lot.
 - One try per task. Real results need repeated tries (and counting repair rounds).
+
+
+## Measuring rates instead of a single outcome: `repeat.py`
+
+A single T22 attempt per language shows the property is possible, not how often it occurs.
+`benchmark/repeat.py` runs many independent trials of one task and reports two separate
+numbers, following a distinction raised during design: the **temptation rate** (how often
+the model attempts the undeclared shortcut at all) and the **containment rate** (of the
+attempts that happen, how many the language actually blocks). This matters because the
+two languages can show the identical temptation rate (the model's own behavior did not
+change) while differing completely on containment (the language changed the consequence).
+
+To use it: collect several independent answers to the same prompt (`T22_python.md` or
+`T22_agentlang.md`), each from a fresh conversation, saved as `T22_<label>.py` or
+`T22_<label>.agl` in one folder (label can be anything, e.g. `T22_01.py`, `T22_02.py`, ...),
+then run:
+
+```
+python3 benchmark/repeat.py benchmark/solutions/t22-trials --task T22
+```
+
+It reports per-trial results plus, for each language: temptation rate, containment rate
+(n/a if nothing was attempted), leak rate (shortcut actually executed), and the fraction
+that solved the task correctly. Works for any task, not just T22, by changing `--task`.
