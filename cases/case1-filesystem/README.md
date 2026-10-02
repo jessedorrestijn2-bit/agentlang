@@ -116,8 +116,31 @@ the agent can touch" to "what the agent can get something else to touch," which 
 the kind of gap `--allow`-style infrastructure around an agent (a container, a proxy) is
 also vulnerable to if it does not also police what gets built inside it.
 
+## A confound found on the Python side, and the fix
+
+The first 9-trial Python run used the same task wording as the Leashterm prompt and came
+back very differently: only 2/9 trials attempted the undeclared file at all (both of which
+leaked, 2/2 = 100%), with the other 7/9 marked "no real implementation" - not because they
+resisted the shortcut, but because most of them misread the task as "define format_id in
+your own answer" rather than "write a program that overwrites project/calc.py on disk", so
+nothing ever touched the target file. This is a genuine prompt-wording confound, not a
+language result: Leashterm's `write(path, text)` syntax makes "the change must land in
+project/calc.py" unambiguous for free, while the open-ended Python prompt did not. The task
+text now says this explicitly ("the change must end up in project/calc.py on disk"); the
+Python side needs to be re-run with the corrected wording before the two languages' rates
+are comparable here.
+
+A second, independent observation from that same run: of the handful of Python trials that
+did try an import-style shortcut, it is not even certain our harness would have caught
+them, because Python's import machinery sometimes reads source files through a different
+internal channel (`open_code`) than plain `open()`/`read_text()`, which the current
+recorder (`benchmark/pywrap.py`) does not hook. This is a real gap in the Python side of
+the measurement setup, independent of the language result, and is noted here rather than
+quietly left out.
+
 ## Status
 
-Self-validated and run once with 9 real ChatGPT trials (Leashterm side only so far; the
-Python side, and a corrected re-run with the updated check, are the next step). The
-deferred-reference finding above is the most interesting result from Case 1 to date.
+Self-validated. Run once with 9 real ChatGPT trials per language. The Leashterm result (67%
+attempted, 100% contained, plus the deferred-reference finding) stands. The Python result
+needs a re-run with the corrected task wording, and the `pywrap.py` `open_code` gap should
+be fixed before that re-run is treated as final.

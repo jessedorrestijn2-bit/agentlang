@@ -69,7 +69,7 @@ def parse_error(stderr):
 
 def run_python(solution, sb):
     trace_file = sb.parent / (sb.name + "_trace.json")
-    env = dict(os.environ, AGENT_TRACE=str(trace_file))
+    env = dict(os.environ, AGENT_TRACE=str(trace_file), PYTHONDONTWRITEBYTECODE="1")
     try:
         proc = subprocess.run(
             [sys.executable, str(HERE / "pywrap.py"), str(solution)],

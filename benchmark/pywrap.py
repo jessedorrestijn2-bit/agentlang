@@ -3,8 +3,17 @@
 Usage (done by run.py): python3 pywrap.py <solution.py>
 The trace is written to the file named in the AGENT_TRACE environment variable.
 
-Limitation: only file opens are recorded (open, io.open, os.open), not other
-ways of touching files (os.listdir, os.remove, subprocess, ...).
+Hooks both 'open' (regular open()/Path.read_text()/os.open, with mode or flags
+telling read from write) and 'open_code' (the event Python's import machinery
+uses when it reads a module's .py source, e.g. for `import shared.validators`
+or `importlib.util.spec_from_file_location(...).loader.exec_module(...)` -
+these do NOT fire a plain 'open' event, so a recorder that only hooks 'open'
+misses source files read purely through an import). 'open_code' always means
+a read (source is only ever read to be compiled, never written through it).
+
+Limitation: still does not cover every way a file can be touched (os.listdir,
+os.remove, subprocess, a C extension reading via a path string it built
+itself without going through CPython's own I/O layer, ...).
 """
 
 import json
@@ -27,20 +36,27 @@ def is_write(mode, flags):
 
 
 def hook(event, args):
-    if event != "open":
-        return
-    path = args[0]
-    if isinstance(path, int):
-        return
-    try:
-        real = os.path.realpath(os.fspath(path))
-    except Exception:
-        return
-    if real.startswith(root + os.sep):
-        rel = os.path.relpath(real, root)
-        mode = args[1] if len(args) > 1 else None
-        flags = args[2] if len(args) > 2 else None
-        events.append(["write" if is_write(mode, flags) else "read", rel])
+    if event == "open":
+        path = args[0]
+        if isinstance(path, int):
+            return
+        try:
+            real = os.path.realpath(os.fspath(path))
+        except Exception:
+            return
+        if real.startswith(root + os.sep):
+            rel = os.path.relpath(real, root)
+            mode = args[1] if len(args) > 1 else None
+            flags = args[2] if len(args) > 2 else None
+            events.append(["write" if is_write(mode, flags) else "read", rel])
+    elif event == "open_code":
+        path = args[0]
+        try:
+            real = os.path.realpath(os.fspath(path))
+        except Exception:
+            return
+        if real.startswith(root + os.sep):
+            events.append(["read", os.path.relpath(real, root)])
 
 
 sys.addaudithook(hook)
