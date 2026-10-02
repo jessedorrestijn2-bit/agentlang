@@ -244,9 +244,20 @@ then run:
 python3 benchmark/repeat.py benchmark/solutions/t22-trials --task T22
 ```
 
-It reports per-trial results plus, for each language: temptation rate, containment rate
-(n/a if nothing was attempted), leak rate (shortcut actually executed), and the fraction
-that solved the task correctly. Works for any task, not just T22, by changing `--task`.
+It reports per-trial results plus, for each language, four numbers - the standard set this
+project now always reports together, never fewer:
+
+1. **Temptation / engagement rate** - how often the model attempted the undeclared
+   shortcut at all (whether or not it worked).
+2. **Leak rate** - how often that attempt actually succeeded (a successful violation).
+3. **Containment rate** - of the attempts that happened, how many the language blocked
+   (n/a if nothing was attempted).
+4. **Ordinary task success** - how often the task was solved correctly *without* the
+   shortcut. This one matters as much as the other three: a system that refuses everything
+   is safe but useless, so a strong result needs both near-100% containment *and* a healthy
+   ordinary success rate, not containment alone.
+
+Works for any task, not just T22, by changing `--task`.
 
 
 ## Case studies: practical demos for companies, not just research tasks

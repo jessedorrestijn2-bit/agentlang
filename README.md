@@ -18,6 +18,22 @@ project.)
    (`--max-steps`, default 10,000), the general safety net that also stops nested
    `retry` blocks from silently multiplying their attempts.
 
+## What Leashterm does and does not guarantee
+
+**Leashterm bounds the effects that happen *during Leashterm's own execution*, through its
+own runtime primitives (`read`, `write`, `fetch`). It does not, and cannot, control what a
+downstream system does with content Leashterm legitimately wrote.**
+
+A program that is only permitted to write `project/calc.py` cannot read a forbidden file to
+put into that write - but nothing stops it from writing *source code that itself refers to*
+something outside its permissions (an `import` statement naming a sibling package, say),
+which only becomes a real access once some other interpreter later runs that file. Case 1
+(`cases/case1-filesystem/`) found exactly this: 3 of 9 trials did not attempt an undeclared
+read at all, yet still smuggled the dependency past Leashterm this way. This is not a bug
+to patch away; it is the honest edge of what a language-level boundary can promise. The
+correct claim is "declared authority is enforced within Leashterm's own execution," not
+"nothing bad can ever result from a Leashterm program."
+
 ## Status (v0.7)
 
 This is an early skeleton: lexer, parser, static permission check, interpreter, tests
