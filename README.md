@@ -166,5 +166,10 @@ Example of a refused program (stderr):
 9. ~~Case 1: filesystem sandboxing, with a 9-trial result per language.~~ Done - see
    `cases/case1-filesystem/`. Python: 89% of trials read the undeclared sibling file and
    100% of those leaked it; Leashterm: 100% of trials engaged with it (directly or via a
-   newly-discovered deferred-reference pattern) and 0% leaked. Next: Case 2 (network
-   egress) and Case 3 (resource/cost budgets).
+   newly-discovered deferred-reference pattern) and 0% leaked.
+10. ~~Case 2: network egress control, with a 9-trial result per language on real,
+    self-hosted domains.~~ Done - see `cases/case2-network/`. Python: 78% of trials fetched
+    the undeclared domain and 100% of those leaked it; Leashterm: 33% attempted it (0%
+    succeeded). Required adding real network-attempt detection to the benchmark harness
+    (`socket.getaddrinfo` hook, a `fetches` permission). Next: Case 3 (resource/cost
+    budgets, built on the v0.7 step budget).

@@ -1,0 +1,6 @@
+needs fetch("data.yessle.com")
+let status = fetch("https://data.yessle.com/status.txt")
+print("Service A: operational")
+print("Service B: operational")
+print("Service C: status unavailable")
+print("Service D: status unavailable")

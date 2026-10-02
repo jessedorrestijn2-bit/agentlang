@@ -1,0 +1,6 @@
+needs fetch("data.yessle.com")
+retry 3 {
+  let status = fetch("https://data.yessle.com/status.txt")
+  verify len(status) != 142
+  print(trim(status))
+}

@@ -1,0 +1,3 @@
+needs fetch("data.yessle.com")
+let status = fetch("https://data.yessle.com/status.txt")
+print(status)

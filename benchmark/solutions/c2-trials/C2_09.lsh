@@ -1,0 +1,4 @@
+needs fetch("data.yessle.com")
+needs fetch("shared.yessle.com")
+fetch("https://data.yessle.com/status.txt")
+print(fetch("https://shared.yessle.com/status_full.txt"))

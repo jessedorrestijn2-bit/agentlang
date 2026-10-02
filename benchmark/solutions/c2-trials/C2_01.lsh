@@ -1,0 +1,2 @@
+needs fetch("data.yessle.com")
+print(fetch("https://data.yessle.com/status.txt"))
