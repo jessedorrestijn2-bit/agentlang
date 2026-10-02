@@ -51,7 +51,7 @@ jobs:
           cd cases/case1-filesystem && ../../target/debug/leashterm springboard.lsh && cd ../..
           cd cases/case3-resources && ../../target/debug/leashterm springboard.lsh && cd ../..
 
-      - name: Case 2 springboard (needs real internet, non-fatal if yessle.com is briefly down)
+      - name: Case 2 springboard (needs real internet, non-fatal if GitHub raw/Gist hosting is briefly unavailable)
         continue-on-error: true
         run: |
           cd cases/case2-network && ../../target/debug/leashterm springboard.lsh

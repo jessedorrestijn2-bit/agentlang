@@ -1,3 +1,3 @@
-needs fetch("data.yessle.com")
-let text = fetch("https://data.yessle.com/status.txt")
+needs fetch("raw.githubusercontent.com")
+let text = fetch("https://raw.githubusercontent.com/jessedorrestijn2-bit/leashterm/main/cases/case2-network/hosted/status.txt")
 print(text)

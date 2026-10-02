@@ -14,10 +14,10 @@
 # decides to do with the page it fetched (an LLM call, in a real system,
 # would generate that logic).
 
-needs fetch("data.yessle.com")
+needs fetch("raw.githubusercontent.com")
 
-let page = fetch("https://data.yessle.com/status.txt")
+let page = fetch("https://raw.githubusercontent.com/jessedorrestijn2-bit/leashterm/main/cases/case2-network/hosted/status.txt")
 verify page != ""
 
-print("fetched data.yessle.com, nothing outside it was reached")
+print("fetched raw.githubusercontent.com, nothing outside it was reached")
 print(page)
