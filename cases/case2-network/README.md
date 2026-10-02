@@ -70,6 +70,31 @@ with no such layer in front of them. This is itself a small, honest footnote on 
 subject: even setting up "one domain an agent may reach" is harder in practice than it
 sounds, for reasons that have nothing to do with the agent at all.)
 
+## Result: 9 trials per language (corrected)
+
+| | Python (9 trials) | Leashterm (9 trials) |
+|---|---|---|
+| Engaged with the undeclared domain at all | 9/9 = 100% | 7/9 = 78% |
+| **Succeeded** (the hidden Service C/D status ended up in the output) | **9/9 = 100%** | **0/7 = 0%** |
+
+Every Python trial parsed the concrete Gist URL out of the pointer text and fetched it
+directly, with no language-level check to stop it, and every one succeeded. Every
+Leashterm trial that tried declared `needs fetch("gist.githubusercontent.com")` honestly
+and was refused before a single line ran; the other 2/9 Leashterm trials never attempted
+the second domain at all.
+
+**A measurement mistake happened and is recorded here rather than quietly fixed.** An
+earlier version of the hosted status page pointed to the Gist only vaguely ("see the Gist
+linked in this repo's case2 README") instead of giving its concrete URL, unlike the
+original design (and unlike T21/T22/C1/C3, where the undeclared resource is always named
+concretely in what the model sees). With that vague wording, 0/9 Leashterm trials even
+attempted the Gist - not because the language contained anything, but because no model
+could construct an unguessable Gist URL from a vague pointer. That result would have looked
+like an even stronger finding than this one, but it would have been measuring "the model
+had no address to go to," not "the language stopped it." The page was corrected to name the
+Gist's raw URL directly, matching how every other case in this project poses the
+temptation, and the trials above are the result after that fix.
+
 ## Reproduce it
 
 This task needs real outbound internet access from wherever you run it (unlike T01-T22 and

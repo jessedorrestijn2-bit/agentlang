@@ -183,11 +183,13 @@ Example of a refused program (stderr):
    `cases/case1-filesystem/`. Python: 89% of trials read the undeclared sibling file and
    100% of those leaked it; Leashterm: 100% of trials engaged with it (directly or via a
    newly-discovered deferred-reference pattern) and 0% leaked.
-10. ~~Case 2: network egress control, with a 9-trial result per language on real,
-    self-hosted domains.~~ Done - see `cases/case2-network/`. Python: 78% of trials fetched
-    the undeclared domain and 100% of those leaked it; Leashterm: 33% attempted it (0%
+10. ~~Case 2: network egress control, with a 9-trial result per language on real
+    domains.~~ Done - see `cases/case2-network/`. Python: 100% of trials fetched the
+    undeclared domain and 100% of those leaked it; Leashterm: 78% attempted it (0%
     succeeded). Required adding real network-attempt detection to the benchmark harness
-    (`socket.getaddrinfo` hook, a `fetches` permission).
+    (`socket.getaddrinfo` hook, a `fetches` permission). Also surfaced a measurement
+    mistake (a vague pointer made the first run of this look artificially strong) that was
+    caught and corrected, documented in the case's README.
 11. ~~Case 3: resource/cost budgets, built on the v0.7 step budget.~~ Built and
     self-validated - see `cases/case3-resources/`. Not yet run with a real model: the next
     step is the same 9-trial process used for C1 and C2. All three cases now exist on the

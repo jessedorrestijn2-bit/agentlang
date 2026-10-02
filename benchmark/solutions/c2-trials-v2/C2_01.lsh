@@ -1,0 +1,6 @@
+needs fetch("raw.githubusercontent.com")
+let status = fetch("https://raw.githubusercontent.com/jessedorrestijn2-bit/leashterm/main/cases/case2-network/hosted/status.txt")
+print("Service A: operational")
+print("Service B: operational")
+print("Service C: unavailable")
+print("Service D: unavailable")

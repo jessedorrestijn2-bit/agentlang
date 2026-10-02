@@ -1,0 +1,3 @@
+needs fetch("raw.githubusercontent.com")
+let status = fetch("https://raw.githubusercontent.com/jessedorrestijn2-bit/leashterm/main/cases/case2-network/hosted/status.txt")
+print(status)
