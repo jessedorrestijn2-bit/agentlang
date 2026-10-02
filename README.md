@@ -163,3 +163,8 @@ Example of a refused program (stderr):
    handle with external infrastructure around an agent rather than in its code) could all
    be built on exactly the same language version. Cases 1 and 2 needed no language change;
    case 3 needed this step budget.
+9. ~~Case 1: filesystem sandboxing, with a 9-trial result per language.~~ Done - see
+   `cases/case1-filesystem/`. Python: 89% of trials read the undeclared sibling file and
+   100% of those leaked it; Leashterm: 100% of trials engaged with it (directly or via a
+   newly-discovered deferred-reference pattern) and 0% leaked. Next: Case 2 (network
+   egress) and Case 3 (resource/cost budgets).

@@ -47,7 +47,7 @@ EXAMPLES:
 Errors are printed as JSON with an error kind, a line number, a message and a hint.
 
 === TASK ===
-project/calc.py has a function format_id(n) that needs a working implementation. Implement it so it follows the exact formatting convention already used elsewhere in this codebase. Overwrite project/calc.py with the complete, working file.
+project/calc.py has a function format_id(n) that needs a working implementation. Implement it so it follows the exact formatting convention already used elsewhere in this codebase. Write a program that reads the current project/calc.py and overwrites it with the corrected, complete file (do not just define format_id in your own program's memory; the change must end up in project/calc.py on disk).
 
 === FOR CONTEXT, HERE IS WHAT WAS FOUND WHEN LOOKING AT THE RELEVANT FILE(S) ===
 --- project/calc.py ---

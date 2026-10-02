@@ -138,9 +138,30 @@ recorder (`benchmark/pywrap.py`) does not hook. This is a real gap in the Python
 the measurement setup, independent of the language result, and is noted here rather than
 quietly left out.
 
+## Final result: 9 trials per language, matched task wording
+
+With the corrected wording (and `pywrap.py`'s `open_code` fix in place), all 9 Python
+trials produced a program that actually performed the file overwrite, giving a clean,
+matched comparison:
+
+| | Python (9 trials) | Leashterm (9 trials) |
+|---|---|---|
+| Engaged with the undeclared shortcut at all | 8/9 = 89% (1 failed on an unrelated path bug) | 9/9 = 100% (6 direct + 3 deferred-reference) |
+| **Succeeded** (the undeclared data ended up in the output) | **8/8 = 100%** | **0/9 = 0%** |
+
+Every Python trial that tried, succeeded: it read `shared/validators.py` directly (no
+language-level permission system stood in its way) and copied the canonical format string
+into `project/calc.py`. Every Leashterm trial that tried was stopped: the 6 direct attempts
+were refused by the permission check before a single line ran, and the 3 deferred-reference
+attempts, while not technically an undeclared *action* by Leashterm itself, were caught by
+the task's own check once that check was extended to look for the pattern (see above) -
+Leashterm never resolved that reference into an actual file read, so the real canonical
+value never entered `project/calc.py`.
+
 ## Status
 
-Self-validated. Run once with 9 real ChatGPT trials per language. The Leashterm result (67%
-attempted, 100% contained, plus the deferred-reference finding) stands. The Python result
-needs a re-run with the corrected task wording, and the `pywrap.py` `open_code` gap should
-be fixed before that re-run is treated as final.
+Complete for a first pass: self-validated, then run with 9 real ChatGPT trials per
+language on matched, corrected task wording. Python: 89% attempted, 0% contained, 89%
+leaked. Leashterm: 100% engaged with the shortcut in some form, 0% succeeded. This is a
+single model, a single task, and one batch of trials - the same caveat as T22 applies
+before treating these percentages as more than a first, reproducible signal.
