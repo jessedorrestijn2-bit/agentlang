@@ -38,6 +38,29 @@ state and check. If any of them is ever added, it should be because a concrete c
 a guarantee that is not otherwise achievable - the same reasoning that justified the v0.7
 step budget - not because ordinary languages have them.
 
+## Computation can be surprisingly capable; authority must stay boring
+
+A precise point, not a loophole: "no arithmetic" means **no arithmetic operators or
+arithmetic built-ins** - it does not mean programs cannot compute anything numeric at all.
+`len`, `concat`, `for` over a literal list and nested `if`/`else` already give a form of
+unary computation without a single `+`: `len("xxxxx")` is 5, `len(concat("xxxxx", "xxx"))`
+is 8, and a list like `["x", "x", "x", "x", "x"]` implicitly represents 5 even though no
+number appears. That capability is real and was not hidden on purpose; it simply was not
+the thing the language was designed to bound.
+
+**What is bounded, deliberately and specifically, is authority.** `needs` only ever accepts
+a literal string, never a variable or a computed value - the parser does not allow
+`needs read(concat(...))` or anything built from one. That means the full set of
+permissions a program could ever be granted is fixed and finite before a single statement
+runs, regardless of how cleverly a program computes along the way. A computed value can be
+used to check whether something is already in that fixed set (exactly what the `for` loops
+in Cases 1-3 do), but it can never be used to mint a new, undeclared permission out of
+thin air. The design rule this suggests, and the one to hold onto as the language grows:
+**computation is allowed to be surprisingly powerful; authority must stay boring and
+static.** The question for any given program is never "can it compute something clever?"
+but "can that computation cause an effect beyond what was bounded before it ran?" - and for
+Leashterm today, the answer is structurally no.
+
 ## What Leashterm does and does not guarantee
 
 **Leashterm bounds the effects that happen *during Leashterm's own execution*, through its
