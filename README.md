@@ -18,6 +18,26 @@ project.)
    (`--max-steps`, default 10,000), the general safety net that also stops nested
    `retry` blocks from silently multiplying their attempts.
 
+## What Leashterm is
+
+**Leashterm is less a general-purpose programming language and more an executable
+capability manifest with computation attached.** `needs` says what a program can touch;
+the absence of unbounded loops says how much computational escalation is possible; the
+step budget bounds composite work; and the audit log makes executed behavior checkable
+after the fact. The distinguishing core is not the syntax - it is pre-execution capability
+checking plus structurally bounded computation, and that is the identity the language
+should stay tightly built around as it grows.
+
+The guiding design question for any future addition is not "what features is the language
+missing?" but: **what is the smallest language in which an agent can still do useful work,
+while every program still admits a compact, pre-execution upper bound on both its
+capabilities and its work?** That is also why arithmetic, dynamic string construction,
+general functions, and subprocesses are deliberately absent rather than merely unfinished:
+each would make the language more capable at the cost of making that upper bound harder to
+state and check. If any of them is ever added, it should be because a concrete case exposed
+a guarantee that is not otherwise achievable - the same reasoning that justified the v0.7
+step budget - not because ordinary languages have them.
+
 ## What Leashterm does and does not guarantee
 
 **Leashterm bounds the effects that happen *during Leashterm's own execution*, through its
